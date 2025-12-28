@@ -143,7 +143,7 @@ class Config:
     ML_CONFIDENCE_THRESHOLD = float(os.getenv('ML_CONFIDENCE_THRESHOLD', '0.6'))
     
     # ═══════════════════ Mode ═══════════════════
-    DRY_RUN = os.getenv('DRY_RUN', 'false').lower() == 'false'
+    DRY_RUN = os.getenv('DRY_RUN', 'true').lower() == 'true'
 
 
 # ══════════════════════════════════════════════════════════════════════════
