@@ -123,7 +123,7 @@ class Config:
     MAX_POSITIONS = int(os.getenv('MAX_POSITIONS', '4'))
     
     # ═══════════════════ Trading ═══════════════════
-    LEVERAGE = int(os.getenv('LEVERAGE', '5'))
+    LEVERAGE = int(os.getenv('LEVERAGE', '3'))
     MIN_BALANCE = float(os.getenv('MIN_BALANCE', '10.0'))
     MARGIN_SAFETY_FACTOR = 1.5
     
