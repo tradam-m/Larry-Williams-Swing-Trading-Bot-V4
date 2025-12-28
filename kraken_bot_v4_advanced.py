@@ -117,6 +117,7 @@ class Config:
         TradingPair('ETH-USD', 'ETHUSD', 0.001, 0.25),
         TradingPair('ADA-USD', 'ADAUSD', 10.0, 0.25),
         TradingPair('SOL-USD', 'SOLUSD', 0.01, 0.20),
+        TradingPair('XRP-USD', 'XRPUSD', 10.0, 0.25),
     ]
     
     MAX_CORRELATION = float(os.getenv('MAX_CORRELATION', '0.7'))  # ← Debe tener 4 espacios
