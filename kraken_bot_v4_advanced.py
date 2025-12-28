@@ -120,11 +120,11 @@ class Config:
     ]
     
     MAX_CORRELATION = float(os.getenv('MAX_CORRELATION', '0.7'))
-    MAX_POSITIONS = int(os.getenv('MAX_POSITIONS', '3'))
+    MAX_POSITIONS = int(os.getenv('MAX_POSITIONS', '4'))
     
     # ═══════════════════ Trading ═══════════════════
-    LEVERAGE = int(os.getenv('LEVERAGE', '3'))
-    MIN_BALANCE = float(os.getenv('MIN_BALANCE', '30.0'))
+    LEVERAGE = int(os.getenv('LEVERAGE', '5'))
+    MIN_BALANCE = float(os.getenv('MIN_BALANCE', '10.0'))
     MARGIN_SAFETY_FACTOR = 1.5
     
     # ═══════════════════ Risk ═══════════════════
@@ -143,7 +143,7 @@ class Config:
     ML_CONFIDENCE_THRESHOLD = float(os.getenv('ML_CONFIDENCE_THRESHOLD', '0.6'))
     
     # ═══════════════════ Mode ═══════════════════
-    DRY_RUN = os.getenv('DRY_RUN', 'true').lower() == 'true'
+    DRY_RUN = os.getenv('DRY_RUN', 'true').lower() == 'false'
 
 
 # ══════════════════════════════════════════════════════════════════════════
