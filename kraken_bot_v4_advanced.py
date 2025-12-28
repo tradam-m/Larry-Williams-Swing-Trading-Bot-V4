@@ -120,7 +120,7 @@ class Config:
     ]
     
     MAX_CORRELATION = float(os.getenv('MAX_CORRELATION', '0.7'))  # ← Debe tener 4 espacios
-    MAX_POSITIONS = int(os.getenv('MAX_POSITIONS', '3'))  # ← Debe tener 4 espacios
+    MAX_POSITIONS = int(os.getenv('MAX_POSITIONS', '1'))  # ← Debe tener 4 espacios
     
     # ══════════════════ Trading ══════════════════
     LEVERAGE = int(os.getenv('LEVERAGE', '3'))
