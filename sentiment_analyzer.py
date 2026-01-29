@@ -1,12 +1,13 @@
 """
-SENTIMENT ANALYZER - CryptoCompare + NewsData.io Integration
+SENTIMENT ANALYZER - CryptoCompare + NewsData.io + Alternative.me Fear & Greed Integration
 Analiza el sentiment de redes sociales y noticias para crypto
 """
 
 import os
 import requests
+import re
 import time
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -16,6 +17,7 @@ class SentimentScore:
     news_score: float
     social_score: float
     newsdata_score: float  # NUEVO: Score de NewsData.io
+    fng_score: float       # NUEVO: Score de Alternative.me (Crypto Fear & Greed)
     confidence: float
     timestamp: datetime
     news_count: int = 0  # NUEVO: Cantidad de noticias analizadas
@@ -27,11 +29,48 @@ class SentimentScore:
         return self.overall_score < threshold
 
 
+class AlternativeMeFearAndGreedScraper:
+    """
+    Scraper para el índice Fear & Greed de Crypto (Alternative.me).
+    Esta fuente es usada como estándar en la industria ("Coinglass uses similar data").
+    URL: https://api.alternative.me/fng/
+    """
+    def __init__(self):
+        self.url = "https://api.alternative.me/fng/"
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        })
+
+    def get_index(self) -> Optional[float]:
+        """
+        Obtiene el valor actual del índice (0-100).
+        Retorna float o None si falla.
+        """
+        try:
+            response = self.session.get(self.url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Alternative.me devuelve: {"data": [{"value": "26", "value_classification": "Fear", ...}]}
+            if 'data' in data and len(data['data']) > 0:
+                val = data['data'][0].get('value')
+                if val is not None:
+                    return float(val)
+            
+            return None
+            
+        except Exception as e:
+            print(f"   ⚠️ Error scraping Alternative.me Fear & Greed: {e}")
+            return None
+
+
 class SentimentAnalyzer:
     """
     Integra datos de sentiment de múltiples fuentes:
     - CryptoCompare API (noticias y social)
     - NewsData.io API (noticias globales)
+    - Alternative.me Fear & Greed Index (Crypto Market)
     """
     
     def __init__(self, cryptocompare_api_key: str, newsdata_api_key: Optional[str] = None):
@@ -43,7 +82,10 @@ class SentimentAnalyzer:
         self.cache = {}
         self.cache_duration = 300  # 5 minutos
         
+        self.fng_scraper = AlternativeMeFearAndGreedScraper() # Inicializar FnG Scraper
+        
         # Keywords para análisis de sentiment
+
         self.positive_keywords = [
             'bullish', 'surge', 'rally', 'gain', 'pump', 'moon', 'adoption',
             'breakthrough', 'soar', 'skyrocket', 'boom', 'breakthrough',
@@ -87,7 +129,7 @@ class SentimentAnalyzer:
         # Check cache
         cache_key = f"{clean_symbol}_{int(time.time() / self.cache_duration)}"
         if cache_key in self.cache:
-            print(f"   📋 Sentiment cache hit: {clean_symbol}")
+            # print(f"   📋 Sentiment cache hit: {clean_symbol}")
             return self.cache[cache_key]
         
         try:
@@ -113,23 +155,41 @@ class SentimentAnalyzer:
                 newsdata_score, news_count = self._get_newsdata_sentiment(clean_symbol)
                 if newsdata_score is not None:
                     scores.append(newsdata_score)
-                    weights.append(0.50)  # 50% peso (fuente más importante)
+                    weights.append(0.30)  # 30% peso
+            
+            # 4. Alternative.me Fear & Greed Index (Crypto)
+            fng_raw_score = self.fng_scraper.get_index()
+            fng_norm_score = 0.0
+            if fng_raw_score is not None:
+                # Normalizar 0-100 a -1 a +1
+                # 0 = -1 (Extreme Fear), 50 = 0 (Neutral), 100 = 1 (Extreme Greed)
+                fng_norm_score = (fng_raw_score - 50) / 50.0
+                scores.append(fng_norm_score)
+                weights.append(0.40) # 40% peso (Indicador fuerte de mercado CS)
             
             # Verificar que tengamos al menos una fuente
             if not scores:
                 return None
             
             # Calculate weighted average
-            overall = sum(s * w for s, w in zip(scores, weights)) / sum(weights)
+            total_weight = sum(weights)
+            overall = sum(s * w for s, w in zip(scores, weights)) / total_weight if total_weight > 0 else 0
             
             # Confidence basada en disponibilidad de datos
-            confidence = len(scores) / 3.0  # 3 fuentes posibles
+            # Ahora tenemos 4 fuentes posibles
+            confidence = len(scores) / 4.0 
+            if confidence > 1.0: confidence = 1.0
             
+            # Ajustar confidence si tenemos FnG (es muy fiable como dato)
+            if fng_raw_score is not None:
+                confidence = max(confidence, 0.6)
+
             sentiment = SentimentScore(
                 overall_score=overall,
                 news_score=cc_news_score or 0.0,
                 social_score=social_score or 0.0,
                 newsdata_score=newsdata_score or 0.0,
+                fng_score=fng_norm_score,
                 confidence=confidence,
                 timestamp=datetime.now(),
                 news_count=news_count
@@ -140,7 +200,7 @@ class SentimentAnalyzer:
             
             print(f"   💭 Sentiment {clean_symbol}: Overall={overall:.2f}")
             print(f"      CC_News={cc_news_score}, Social={social_score}, NewsData={newsdata_score}")
-            print(f"      Confidence={confidence:.2f}, News analyzed={news_count}")
+            print(f"      Crypto Fear&Greed={fng_raw_score} (norm: {fng_norm_score:.2f})")
             
             return sentiment
             
