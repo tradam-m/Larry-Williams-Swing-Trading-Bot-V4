@@ -15,12 +15,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas ccxt python-dotenv requests
 
-      
       - name: Crea file .env dai Secrets
         run: |
           echo "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}" > .env
           echo "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}" >> .env
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
 
-      - name: Avvia il Bot in Simulazione
-        run: python start_live_simulation.py
+      - name: Avvia il Bot (Ricerca Automatica)
+        run: |
+          $targetFile = Get-ChildItem -Recurse -Filter "start_live_simulation.py" | Select-Object -First 1
+          if ($targetFile) {
+            Write-Host "File trovato in: $($targetFile.FullName)"
+            python $targetFile.FullName
+          } else {
+            Write-Error "Errore: start_live_simulation.py non trovato nel repository!"
+          }
