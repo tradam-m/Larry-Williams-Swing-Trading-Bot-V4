@@ -1,0 +1,18 @@
+def mean_reversion_signal(self, data):
+    sma = data['Close'].rolling(20).mean()
+    std = data['Close'].rolling(20).std()
+    
+    upper_band = sma + (2 * std)
+    lower_band = sma - (2 * std)
+    
+    current_price = data['Close'][-1]
+    
+    # Near lower band = oversold = buy
+    if (current_price - lower_band[-1]) / lower_band[-1] < 0.02:
+        return 'BUY', 0.85
+    
+    # Near upper band = overbought = sell
+    elif (upper_band[-1] - current_price) / upper_band[-1] < 0.02:
+        return 'SELL', 0.85
+    
+    return None, 0.0
