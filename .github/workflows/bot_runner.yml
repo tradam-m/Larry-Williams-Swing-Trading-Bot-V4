@@ -1,26 +1,2 @@
-name: Controllo Bot Larry
-
-on:
-  workflow_dispatch:
-
-jobs:
-  run-my-code:
-    runs-on: self-hosted
-    steps:
-      - name: Sincronizza i file
-        uses: actions/checkout@v4
-
-      - name: Crea file .env dai Secrets
-        run: |
-          echo "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}" > .env
-          echo "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}" >> .env
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-
-      - name: Verifica Posizione e Avvia
-        run: |
-          Write-Host "--- DOVE SIAMO? ---"
-          Get-Location
-          Write-Host "--- COSA VEDO QUI? ---"
-          ls
-          Write-Host "--- TENTO L'AVVIO ---"
-          python start_live_simulation.py
+- name: Avvia il Bot
+        run: python start_live_simulation.py
