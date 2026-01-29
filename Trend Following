@@ -1,0 +1,13 @@
+def trend_following_signal(self, data):
+    ma_fast = data['Close'].rolling(10).mean()
+    ma_slow = data['Close'].rolling(50).mean()
+    
+    # Golden cross: fast crosses above slow
+    if ma_fast[-2] <= ma_slow[-2] and ma_fast[-1] > ma_slow[-1]:
+        return 'BUY', 0.9
+    
+    # Death cross: fast crosses below slow  
+    elif ma_fast[-2] >= ma_slow[-2] and ma_fast[-1] < ma_slow[-1]:
+        return 'SELL', 0.9
+    
+    return None, 0.0
