@@ -1,0 +1,46 @@
+name: Kraken Trading Bot V4
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:         # Manual trigger option
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Load RL State
+      uses: actions/cache@v3
+      with:
+        path: rl_state.json
+        key: rl-state-${{ github.run_number }}
+        restore-keys: |
+          rl-state-
+    
+    - name: Execute Bot
+      env:
+        KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
+        KRAKEN_API_SECRET: ${{ secrets.KRAKEN_API_SECRET }}
+        CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
+      run: |
+        python kraken_bot_v4_advanced.py
+    
+    - name: Save RL State
+      uses: actions/cache@v3
+      with:
+        path: rl_state.json
+        key: rl-state-${{ github.run_number }}
