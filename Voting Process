@@ -1,0 +1,17 @@
+def aggregate_votes(self, votes, weights):
+    buy_score = 0.0
+    sell_score = 0.0
+    
+    for strategy, vote in votes.items():
+        if vote['signal'] == 'BUY':
+            buy_score += vote['confidence'] * weights[strategy]
+        elif vote['signal'] == 'SELL':
+            sell_score += vote['confidence'] * weights[strategy]
+    
+    # Need at least 60% consensus
+    if buy_score > sell_score and buy_score > 0.6:
+        return 'BUY', buy_score
+    elif sell_score > buy_score and sell_score > 0.6:
+        return 'SELL', sell_score
+    
+    return None, 0.0
