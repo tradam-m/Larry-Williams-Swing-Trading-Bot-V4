@@ -16,6 +16,11 @@ jobs:
           echo "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}" >> .env
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
 
-      - name: Avvia il Bot
+      - name: Verifica Posizione e Avvia
         run: |
+          Write-Host "--- DOVE SIAMO? ---"
+          Get-Location
+          Write-Host "--- COSA VEDO QUI? ---"
+          ls
+          Write-Host "--- TENTO L'AVVIO ---"
           python start_live_simulation.py
