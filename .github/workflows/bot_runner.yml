@@ -1,14 +1,14 @@
 name: Controllo Bot Larry
-on: 
-  workflow_dispatch: # Questo ti permette di premere un tasto per avviarlo
+
+on:
+  workflow_dispatch:
 
 jobs:
   run-my-code:
-    runs-on: self-hosted # Questo dice a GitHub: "Usa il PC di Larry"
+    runs-on: self-hosted
     steps:
       - name: Sincronizza i file
-        uses: actions/checkout@v4 # Scarica i 14 file sul tuo runner
+        uses: actions/checkout@v4
 
       - name: Avvia il Bot
-        # ATTENZIONE: cambia 'main.py' con il nome del tuo file principale
         run: python main.py
