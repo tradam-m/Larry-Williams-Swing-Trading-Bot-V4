@@ -1,0 +1,17 @@
+def calculate_confidence_score(self, features):
+    score = 0.0
+    weights = 0.0
+    
+    # Volume confirmation (30% weight)
+    if features['volume_ratio'] > 1.2:
+        score += 0.3
+    weights += 0.3
+    
+    # Price position (20% weight)
+    if features['price_position'] < 0.3:  # Near lows
+        score += 0.2
+    weights += 0.2
+    
+    # ... more features
+    
+    return score / weights if weights > 0 else 0.0
