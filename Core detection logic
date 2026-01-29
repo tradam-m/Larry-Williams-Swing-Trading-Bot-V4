@@ -1,0 +1,16 @@
+def detect_swing_points(self, data):
+    lows = data['Low'].values
+    highs = data['High'].values
+    
+    # Detect swing lows
+    for i in range(1, len(lows) - 1):
+        if lows[i] < lows[i-1] and lows[i] < lows[i+1]:
+            # Potential swing low found
+            if self._validate_with_volume(i):
+                self.swing_lows[i] = lows[i]
+    
+    # Detect swing highs  
+    for i in range(1, len(highs) - 1):
+        if highs[i] > highs[i-1] and highs[i] > highs[i+1]:
+            if self._validate_with_volume(i):
+                self.swing_highs[i] = highs[i]
