@@ -1,0 +1,38 @@
+def detect_market_regime(self, data, lookback=30):
+    recent = data.tail(lookback)
+    returns = recent['Close'].pct_change()
+    
+    volatility = returns.std()
+    avg_volatility = data['Close'].pct_change().std()
+    
+    # Calculate trend strength
+    close_change = abs(recent['Close'][-1] - recent['Close'][0])
+    high_low_range = (recent['High'] - recent['Low']).mean()
+    trend_strength = close_change / (high_low_range * lookback)
+    
+    if volatility > avg_volatility * 1.5:
+        return 'VOLATILE'
+    elif trend_strength > 0.5:
+        return 'TRENDING'
+    else:
+        return 'RANGING'
+
+def get_adapted_parameters(self, regime, base_sl, base_tp):
+    if regime == 'VOLATILE':
+        return {
+            'stop_loss': base_sl * 1.5,      # Wider stops
+            'take_profit': base_tp * 1.0,    # Keep targets same
+            'position_size': 0.5              # Reduce size
+        }
+    elif regime == 'TRENDING':
+        return {
+            'stop_loss': base_sl * 1.2,
+            'take_profit': base_tp * 1.5,    # Bigger targets
+            'position_size': 1.0
+        }
+    else:  # RANGING
+        return {
+            'stop_loss': base_sl * 0.8,      # Tighter stops
+            'take_profit': base_tp * 0.7,    # Smaller targets
+            'position_size': 0.8
+        }
