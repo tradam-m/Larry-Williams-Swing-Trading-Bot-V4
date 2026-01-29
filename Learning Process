@@ -1,0 +1,28 @@
+def calculate_reward(self, trade_result):
+    pnl_pct = trade_result['pnl_pct']
+    
+    # Base reward from profit/loss
+    reward = pnl_pct / 10  # Normalize
+    
+    # Bonus for big wins
+    if pnl_pct > 5.0:
+        reward *= 1.5
+    
+    # Extra penalty for big losses  
+    elif pnl_pct < -3.0:
+        reward *= 1.5  # Amplify the pain
+    
+    # Bonus for proper risk management
+    if trade_result['used_stop_loss']:
+        reward *= 1.1
+    
+    return reward
+
+def update_q_value(self, state, action, reward, next_state):
+    current_q = self.q_table[state][action]
+    max_next_q = max(self.q_table[next_state].values())
+    
+    # Q-learning update rule
+    new_q = current_q + 0.1 * (reward + 0.95 * max_next_q - current_q)
+    
+    self.q_table[state][action] = new_q
