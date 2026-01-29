@@ -13,8 +13,9 @@ jobs:
       - name: Installa librerie
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install pandas ccxt python-dotenv requests
 
+      
       - name: Crea file .env dai Secrets
         run: |
           echo "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}" > .env
