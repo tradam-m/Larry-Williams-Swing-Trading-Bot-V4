@@ -1,0 +1,29 @@
+🔍 Layer 1: Technical Analysis
+   → Swing low detected at $36,820
+   → ML confidence: 82%
+   → Volume: 143% of average
+   ✅ PASS
+
+📊 Layer 2: Sentiment Analysis  
+   → News sentiment: +0.42 (bullish)
+   → Social engagement: Rising
+   → Overall: Positive confirmation
+   ✅ PASS
+🎯 Layer 3: Ensemble Voting
+   → Swing Strategy: BUY (85%)
+   → Momentum Strategy: BUY (72%)
+   → Mean Reversion: NEUTRAL (55%)
+   → Trend Following: BUY (68%)
+   → Consensus: 75% (3/4 agree)
+   → Weighted confidence: 76%
+   ✅ PASS (exceeds 60% threshold)
+🤖 Layer 4: RL Position Sizing
+   → Market state: Low vol, strong trend, good recent WR
+   → Selected action: 70% allocation, 1.3x leverage
+   → Capital allocated: $560 @ 4x leverage
+   ✅ PASS
+💰 EXECUTION
+   → Entry: $36,840
+   → Position size: 0.0608 BTC
+   → Stop loss: $35,365 (-4%)
+   → Take profit: $39,787 (+8%)
