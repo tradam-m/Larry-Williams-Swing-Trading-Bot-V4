@@ -1,0 +1,16 @@
+def analyze_news_sentiment(self, articles):
+    positive_keywords = ['bullish', 'surge', 'rally', 'adoption']
+    negative_keywords = ['crash', 'dump', 'regulation', 'decline']
+    
+    scores = []
+    for article in articles:
+        text = article['title'].lower() + ' ' + article['body'].lower()
+        
+        pos_count = sum(1 for word in positive_keywords if word in text)
+        neg_count = sum(1 for word in negative_keywords if word in text)
+        
+        if pos_count + neg_count > 0:
+            score = (pos_count - neg_count) / (pos_count + neg_count)
+            scores.append(score)
+    
+    return sum(scores) / len(scores) if scores else 0.0
