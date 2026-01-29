@@ -1,0 +1,33 @@
+def update_trailing_stop(self, position, current_price):
+    if position['pnl_pct'] > 3.0:  # In profit by 3%+
+        # Track peak price
+        if current_price > position['peak_price']:
+            position['peak_price'] = current_price
+        
+        # Calculate drawdown from peak
+        peak_pnl = calculate_pnl(position['entry'], position['peak_price'])
+        current_pnl = calculate_pnl(position['entry'], current_price)
+        drawdown = peak_pnl - current_pnl
+        
+        # Close if drawdown exceeds 2.5%
+        if drawdown > 2.5:
+            self.close_position(position, 'TRAILING_STOP')
+
+# Correlation-Aware Position Limits
+def check_correlation_limit(self, new_asset, open_positions, max_corr=0.7):
+    returns_dict = {}
+    
+    for asset in [new_asset] + open_positions:
+        data = self.get_market_data(asset)
+        returns_dict[asset] = data['Close'].pct_change().tail(30)
+    
+    corr_matrix = pd.DataFrame(returns_dict).corr()
+    
+    # Check correlation with each open position
+    for open_asset in open_positions:
+        correlation = abs(corr_matrix.loc[new_asset, open_asset])
+        
+        if correlation > max_corr:
+            return False, correlation
+    
+    return True, 0.0
