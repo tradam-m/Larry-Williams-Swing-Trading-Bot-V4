@@ -1,0 +1,27 @@
+class MarketState:
+    volatility: float           # Current market volatility
+    trend_strength: float       # How strong is the trend?
+    win_rate_recent: float      # Recent trading performance
+    drawdown_current: float     # How much are we down from peak?
+    positions_open: int         # How many trades are active?
+    confidence_signal: float    # How confident is the ensemble?
+
+def select_action(self, state):
+    state_key = self._discretize_state(state)
+    
+    # Epsilon-greedy: 90% exploit, 10% explore
+    if random.random() < 0.1:
+        # Exploration: try something random
+        return random.choice(self.actions)
+    else:
+        # Exploitation: use best known action
+        q_values = self.q_table[state_key]
+        return max(q_values, key=q_values.get)
+
+Position Sizes: 20%, 33%, 50%, 70%, 100% of available capital
+Leverage Multipliers: 0.5x, 1.0x, 1.5x of base leverage
+
+Examples:
+- Action 1: 20% capital, 0.5x leverage (very conservative)
+- Action 8: 50% capital, 1.0x leverage (balanced)
+- Action 15: 100% capital, 1.5x leverage (aggressive)
