@@ -1,0 +1,38 @@
+def save_state(self):
+    state_data = {
+        'q_table': {k: dict(v) for k, v in self.q_table.items()},
+        'metadata': {
+            'last_update': datetime.now().isoformat(),
+            'num_states': len(self.q_table),
+            'total_trades': self.trade_count
+        }
+    }
+    
+    with open('rl_state.json', 'w') as f:
+        json.dump(state_data, f)
+
+def load_state(self):
+    try:
+        with open('rl_state.json', 'r') as f:
+            state_data = json.load(f)
+        
+        self.q_table = {
+            k: {int(action): value for action, value in actions.items()}
+            for k, actions in state_data['q_table'].items()
+        }
+        
+        print(f"Loaded RL state: {len(self.q_table)} states")
+    except FileNotFoundError:
+        print("No previous RL state found, starting fresh")
+
+# Monitoring and Notifications
+def send_notification(self, message):
+    url = f"https://api.telegram.org/bot{self.token}/sendMessage"
+    data = {
+        'chat_id': self.chat_id,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
+    
+    response = requests.post(url, data=data)
+    return response.status_code == 200
