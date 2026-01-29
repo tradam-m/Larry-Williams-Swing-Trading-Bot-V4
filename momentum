@@ -1,0 +1,21 @@
+def calculate_momentum_signal(self, data):
+    # RSI calculation
+    delta = data['Close'].diff()
+    gain = delta.where(delta > 0, 0).rolling(14).mean()
+    loss = -delta.where(delta < 0, 0).rolling(14).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    
+    # Rate of Change
+    roc = ((data['Close'][-1] - data['Close'][-14]) / 
+           data['Close'][-14] * 100)
+    
+    # Strong momentum buy
+    if rsi[-1] > 55 and roc > 3 and volume_ratio > 1.2:
+        return 'BUY', 0.8
+    
+    # Oversold reversal
+    elif rsi[-1] < 30 and roc < -5:
+        return 'BUY', 0.7
+    
+    return None, 0.0
