@@ -23,4 +23,5 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
           PYTHONUTF8: 1
-        run: python start_live_simulation.py
+          PYTHONUNBUFFERED: 1 # <--- Questa è la riga magica
+        run: python -u start_live_simulation.py # <--- Aggiunto -u per output non bufferizzato
