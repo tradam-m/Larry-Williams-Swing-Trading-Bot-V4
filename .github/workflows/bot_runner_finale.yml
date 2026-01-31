@@ -15,6 +15,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
+      - name: Crea file .env aggiornato
+        run: |
+          python -c "
+          import os
+          keys = {
+              'KRAKEN_API_KEY': '${{ secrets.KRAKEN_API_KEY }}',
+              'KRAKEN_SECRET_KEY': '${{ secrets.KRAKEN_API_SECRET }}',
+              'TELEGRAM_BOT_TOKEN': '${{ secrets.TELEGRAM_BOT_TOKEN }}',
+              'TELEGRAM_CHAT_ID': '${{ secrets.TELEGRAM_CHAT_ID }}',
+              'GEMINI_API_KEY': '${{ secrets.GEMINI_API_KEY }}',
+              'OPENAI_API_KEY': '${{ secrets.OPENAI_API_KEY }}',
+              'NEWSDATA_API_KEY': '${{ secrets.NEWSDATA_API_KEY }}',
+              'CRYPTOCOMPARE_API_KEY': '${{ secrets.CRYPTOCOMPARE_API_KEY }}'
+          }
+          with open('.env', 'w', encoding='utf-8') as f:
+              for k, v in keys.items():
+                  f.write(f'{k}={v}\n')
+          "
       - name: Esegui il Bot
         env:
           PYTHONIOENCODING: utf-8
