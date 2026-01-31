@@ -16,16 +16,8 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: Crea file .env aggiornato
-        shell: pwsh # Forza l'uso di PowerShell Core se disponibile o configura l'output
         run: |
-          $env_content = @"
-          KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}
-          KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-          "@
-          [System.IO.File]::WriteAllLines("$(Get-Location)\.env", $env_content, [System.Text.Encoding]::UTF8)
+          python -c "import os; content = f'KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}\nKRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}\nGEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}\nTELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}\nTELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}\n'; f = open('.env', 'w', encoding='utf-8'); f.write(content); f.close()"
 
       - name: Esegui il Bot
         run: python start_live_simulation.py
