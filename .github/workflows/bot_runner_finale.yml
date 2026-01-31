@@ -10,48 +10,14 @@ jobs:
       - name: Scarica i file dal repository
         uses: actions/checkout@v4
 
-      - name: Installa dipendenze dal requirements.txt
+      - name: Installa dipendenze
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Crea file .env aggiornato
-        run: |
-          python -c "
-          import os
-          keys = {
-              'KRAKEN_API_KEY': '${{ secrets.KRAKEN_API_KEY }}',
-              'KRAKEN_SECRET_KEY': '${{ secrets.KRAKEN_API_SECRET }}',
-              'TELEGRAM_BOT_TOKEN': '${{ secrets.TELEGRAM_BOT_TOKEN }}',
-              'TELEGRAM_CHAT_ID': '${{ secrets.TELEGRAM_CHAT_ID }}',
-              'GEMINI_API_KEY': '${{ secrets.GEMINI_API_KEY }}',
-              'OPENAI_API_KEY': '${{ secrets.OPENAI_API_KEY }}',
-              'NEWSDATA_API_KEY': '${{ secrets.NEWSDATA_API_KEY }}',
-              'CRYPTOCOMPARE_API_KEY': '${{ secrets.CRYPTOCOMPARE_API_KEY }}'
-          }
-          with open('.env', 'w', encoding='utf-8') as f:
-              for k, v in keys.items():
-                  f.write(f'{k}={v}\n')
-          "
       - name: Esegui il Bot
         env:
           PYTHONIOENCODING: utf-8
           PYTHONUTF8: 1
           PYTHONUNBUFFERED: 1
         run: python -u start_live_simulation.py
-
-      - name: Diagnostic Secrets
-        run: |
-          python -c "import os; print('KRAKEN_KEY presente:', bool('${{ secrets.KRAKEN_API_KEY }}')); print('KRAKEN_SECRET presente:', bool('${{ secrets.KRAKEN_API_SECRET }}'))"
-
-      - name: Crea file .env aggiornato
-        run: |
-          python -c "
-          import os
-          f = open('.env', 'w', encoding='utf-8')
-          f.write(f'KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}\n')
-          f.write(f'KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_API_SECRET }}\n')
-          f.write(f'TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}\n')
-          f.write(f'TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}\n')
-          f.close()
-          "
