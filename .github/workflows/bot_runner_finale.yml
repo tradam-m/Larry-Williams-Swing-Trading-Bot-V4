@@ -1,20 +1,22 @@
 name: Controllo Bot Larry Finale
 
 on:
-    workflow_dispatch: # Ti permette di avviarlo a mano con il tasto "Run workflow"
+  workflow_dispatch: # Ti permette di avviarlo a mano con il tasto "Run workflow"
 
 jobs:
-    run-trading-bot:
-        runs-on: self-hosted
-        steps:
-            - name: Scarica i file dal repository
-              uses: actions/checkout@v4
+  run-trading-bot:
+    runs-on: self-hosted
+    steps:
+      - name: Scarica i file dal repository
+        uses: actions/checkout@v4
 
-            - name: Crea file .env aggiornato
-              run: |
-                  echo "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}" > .env
-                  echo "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}" >> .env
-                  echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+      - name: Crea file .env aggiornato
+        run: |
+          echo "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}" > .env
+          echo "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_SECRET_KEY }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
 
-            - name: Esegui il Bot
-              run: python start_live_simulation.py
+      - name: Esegui il Bot
+        run: python start_live_simulation.py
