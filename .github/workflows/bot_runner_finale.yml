@@ -39,3 +39,19 @@ jobs:
           PYTHONUTF8: 1
           PYTHONUNBUFFERED: 1
         run: python -u start_live_simulation.py
+
+      - name: Diagnostic Secrets
+        run: |
+          python -c "import os; print('KRAKEN_KEY presente:', bool('${{ secrets.KRAKEN_API_KEY }}')); print('KRAKEN_SECRET presente:', bool('${{ secrets.KRAKEN_API_SECRET }}'))"
+
+      - name: Crea file .env aggiornato
+        run: |
+          python -c "
+          import os
+          f = open('.env', 'w', encoding='utf-8')
+          f.write(f'KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}\n')
+          f.write(f'KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_API_SECRET }}\n')
+          f.write(f'TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}\n')
+          f.write(f'TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}\n')
+          f.close()
+          "
