@@ -9,6 +9,14 @@ jobs:
     steps:
       - name: Scarica i file
         uses: actions/checkout@v4
+      - name: Lista File Reale
+        run: |
+          python -c "import os; print('--- ELENCO FILE NELLA CARTELLA ---'); print(os.listdir('.'))"
+
+      - name: Esegui il Bot
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python -u start_live_simulation.py
 
       - name: Diagnosi Credenziali
         run: |
