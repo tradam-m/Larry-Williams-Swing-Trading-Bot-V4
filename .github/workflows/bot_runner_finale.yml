@@ -20,4 +20,10 @@ jobs:
           PYTHONIOENCODING: utf-8
           PYTHONUTF8: 1
           PYTHONUNBUFFERED: 1
+          # Diciamo al bot di caricare il file dalla posizione fissa sul tuo PC
+          ENV_PATH: C:\Trading_Config\.env
         run: python -u start_live_simulation.py
+
+      - name: Verifica File Config
+        run: |
+          if (Test-Path "C:\Trading_Config\.env") { echo "File trovato!" } else { echo "File NON trovato nel percorso C:\Trading_Config\.env" }
