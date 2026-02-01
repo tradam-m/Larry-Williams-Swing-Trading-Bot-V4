@@ -9,14 +9,11 @@ jobs:
     steps:
       - name: Scarica i file
         uses: actions/checkout@v4
-      - name: Lista File Reale
-        run: |
-          python -c "import os; print('--- ELENCO FILE NELLA CARTELLA ---'); print(os.listdir('.'))"
 
-      - name: Creazione Configurazione e Avvio
+      - name: Configura Ambiente e Avvia Bot
         shell: powershell
         run: |
-          # 1. Definiamo il contenuto
+          # 1. Creiamo il contenuto del file .env usando i nomi corretti dei tuoi Secrets
           $content = @(
             "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}",
             "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_API_SECRET }}",
@@ -25,39 +22,15 @@ jobs:
             "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
           )
 
-          # 2. Scriviamo il file proprio qui
-          $path = Join-Path (Get-Location) ".env"
+          # 2. Scriviamo il file con la codifica che piace a Python
           $utf8NoBom = New-Object System.Text.UTF8Encoding $false
-          [System.IO.File]::WriteAllLines($path, $content, $utf8NoBom)
+          [System.IO.File]::WriteAllLines("$(Get-Location)\.env", $content, $utf8NoBom)
 
-          # 3. Controllo veloce: il file esiste ora?
-          if (Test-Path $path) { 
-              Write-Host "✅ File .env creato correttamente in: $path"
-              # Mostriamo le prime lettere di una chiave per sicurezza (opzionale)
-              Get-Content $path | Select-Object -First 1
-          } else { 
-              Write-Host "❌ Errore: Impossibile creare il file .env" 
-          }
+          Write-Host "✅ File .env creato nella cartella: $(Get-Location)"
 
-          # 4. Lanciamo il bot
+          # 3. Lanciamo il bot direttamente da qui
           python -u start_live_simulation.py
 
-          - name: Diagnosi Credenziali
-            run: |
-              python -c "
-              import os
-              from dotenv import load_dotenv
-          # 1. Vediamo dove siamo
-          print(f'Cartella di lavoro: {os.getcwd()}')
-
-          # 2. Proviamo a caricare il file .env
-          check_load = load_dotenv()
-          print(f'Esito load_dotenv: {check_load}')
-
-          # 3. Verifichiamo se le chiavi Kraken sono caricate
-          api_key = os.getenv('KRAKEN_API_KEY')
-          api_secret = os.getenv('KRAKEN_SECRET_KEY') # o KRAKEN_API_SECRET
-
-          print(f'KRAKEN_API_KEY trovata: {bool(api_key)}')
-          print(f'KRAKEN_SECRET_KEY trovata: {bool(api_secret)}')
-          "
+      - name: Diagnosi Credenziali
+        run: |
+          python -c "import os\nfrom dotenv import load_dotenv\nprint(f'Cartella di lavoro: {os.getcwd()}')\ncheck_load = load_dotenv()\nprint(f'Esito load_dotenv: {check_load}')\napi_key = os.getenv('KRAKEN_API_KEY')\napi_secret = os.getenv('KRAKEN_SECRET_KEY')\nprint(f'KRAKEN_API_KEY trovata: {bool(api_key)}')\nprint(f'KRAKEN_SECRET_KEY trovata: {bool(api_secret)}')"
