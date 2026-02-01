@@ -1,76 +1,16 @@
 name: Controllo Bot Larry Finale
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Questo deve essere allineato a sinistra
 
 jobs:
-  run-trading-bot:
-    runs-on: self-hosted
-    steps:
-      - name: Scarica i file dal repository
+  run-trading-bot: # 2 spazi
+    runs-on: self-hosted # 4 spazi
+    steps: # 4 spazi
+      - name: Scarica i file # 6 spazi
         uses: actions/checkout@v4
 
-      - name: Installa dipendenze
+      - name: Test rapido visibilità # 6 spazi
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-
-      - name: Creazione forzata file .env
-        run: |
-          python -c "
-          import os
-          # Definiamo le chiavi prendendole dai segreti di GitHub
-          config = {
-              'KRAKEN_API_KEY': '${{ secrets.KRAKEN_API_KEY }}',
-              'KRAKEN_SECRET_KEY': '${{ secrets.KRAKEN_API_SECRET }}',
-              'TELEGRAM_BOT_TOKEN': '${{ secrets.TELEGRAM_BOT_TOKEN }}',
-              'TELEGRAM_CHAT_ID': '${{ secrets.TELEGRAM_CHAT_ID }}',
-              'GEMINI_API_KEY': '${{ secrets.GEMINI_API_KEY }}'
-          }
-          # Scriviamo il file nella cartella corrente
-          with open('.env', 'w', encoding='utf-8') as f:
-              for key, value in config.items():
-                  f.write(f'{key}={value}\n')
-          
-          print('File .env creato in:', os.getcwd())
-          "
-
-      - name: Esegui il Bot
-        env:
-          PYTHONIOENCODING: utf-8
-          PYTHONUTF8: 1
-          PYTHONUNBUFFERED: 1
-        run: python -u start_live_simulation.py
-
-        # Diciamo al bot di caricare il file dalla posizione fissa sul tuo PC
-          ENV_PATH: C:\Trading_Config\.env
-        run: python -u start_live_simulation.py
-
-      - name: Verifica File Config
-        run: |
-          if (Test-Path "C:\Trading_Config\.env") { echo "File trovato!" } else { echo "File NON trovato nel percorso C:\Trading_Config\.env" }
-
-      - name: Debug e Avvio Bot
-        run: |
-          python -c "
-          import os
-          from dotenv import load_dotenv
-          
-          print('--- CONTROLLO CARTELLA ---')
-          print('Cartella attuale:', os.getcwd())
-          print('File presenti:', os.listdir('.'))
-          
-          print('\n--- TEST DOTENV ---')
-          caricato = load_dotenv()
-          print('File .env caricato con successo:', caricato)
-          
-          # Verifichiamo una chiave senza mostrarla
-          key_exists = 'KRAKEN_API_KEY' in os.environ
-          print('Variabile KRAKEN_API_KEY presente nel sistema:', key_exists)
-          
-          if not caricato and not key_exists:
-              print('\n[ATTENZIONE] Nessuna configurazione trovata!')
-          "
-          
-          echo "--- AVVIO PROGRAMMA PRINCIPALE ---"
-          python -u start_live_simulation.py
+          echo "Il workflow è attivo e funzionante!"
+          python --version
