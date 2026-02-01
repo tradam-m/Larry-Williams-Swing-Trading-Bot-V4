@@ -13,25 +13,23 @@ jobs:
       - name: Configura Ambiente e Avvia Bot
         shell: powershell
         env:
-          PYTHONUTF8: "1" # Forza l'uso di UTF-8 per evitare errori di stampa
+          PYTHONUTF8: "1"
         run: |
-          # 1. Creazione contenuto .env
+          # Creiamo il file .env con i nomi esatti che il bot si aspetta
           $content = @(
             "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}",
-            "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_API_SECRET }}",
+            "KRAKEN_API_SECRET=${{ secrets.KRAKEN_API_SECRET }}", # Corretto da KRAKEN_SECRET_KEY
             "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}",
             "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}",
             "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
           )
 
-          # 2. Scrittura file
           $utf8NoBom = New-Object System.Text.UTF8Encoding $false
           [System.IO.File]::WriteAllLines("$(Get-Location)\.env", $content, $utf8NoBom)
 
-          Write-Host "✅ Ambiente pronto, avvio in corso..."
+          Write-Host "✅ Ambiente pronto con nomi variabili sincronizzati."
 
-          # 3. Lancio del bot
           python -u start_live_simulation.py
       - name: Diagnosi Credenziali
         run: |
-          python -c "import os\nfrom dotenv import load_dotenv\nprint(f'Cartella di lavoro: {os.getcwd()}')\ncheck_load = load_dotenv()\nprint(f'Esito load_dotenv: {check_load}')\napi_key = os.getenv('KRAKEN_API_KEY')\napi_secret = os.getenv('KRAKEN_SECRET_KEY')\nprint(f'KRAKEN_API_KEY trovata: {bool(api_key)}')\nprint(f'KRAKEN_SECRET_KEY trovata: {bool(api_secret)}')"
+          python -c "import os\nfrom dotenv import load_dotenv\nprint(f'Cartella di lavoro: {os.getcwd()}')\ncheck_load = load_dotenv()\nprint(f'Esito load_dotenv: {check_load}')\napi_key = os.getenv('KRAKEN_API_KEY')\napi_secret = os.getenv('KRAKEN_API_SECRET')\nprint(f'KRAKEN_API_KEY trovata: {bool(api_key)}')\nprint(f'KRAKEN_API_SECRET trovata: {bool(api_secret)}')"
