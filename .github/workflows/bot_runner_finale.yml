@@ -13,6 +13,14 @@ jobs:
         run: |
           python -c "import os; print('--- ELENCO FILE NELLA CARTELLA ---'); print(os.listdir('.'))"
 
+      - name: Creazione file .env
+        run: |
+          echo "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}" > .env
+          echo "KRAKEN_SECRET_KEY=${{ secrets.KRAKEN_API_SECRET }}" >> .env
+          echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+
       - name: Esegui il Bot
         env:
           PYTHONIOENCODING: utf-8
