@@ -1,16 +1,32 @@
 name: Controllo Bot Larry Finale
 
 on:
-  workflow_dispatch: # Questo deve essere allineato a sinistra
+  workflow_dispatch:
 
 jobs:
-  run-trading-bot: # 2 spazi
-    runs-on: self-hosted # 4 spazi
-    steps: # 4 spazi
-      - name: Scarica i file # 6 spazi
+  run-trading-bot:
+    runs-on: self-hosted
+    steps:
+      - name: Scarica i file
         uses: actions/checkout@v4
 
-      - name: Test rapido visibilità # 6 spazi
+      - name: Diagnosi Credenziali
         run: |
-          echo "Il workflow è attivo e funzionante!"
-          python --version
+          python -c "
+          import os
+          from dotenv import load_dotenv
+
+          # 1. Vediamo dove siamo
+          print(f'Cartella di lavoro: {os.getcwd()}')
+
+          # 2. Proviamo a caricare il file .env
+          check_load = load_dotenv()
+          print(f'Esito load_dotenv: {check_load}')
+
+          # 3. Verifichiamo se le chiavi Kraken sono caricate
+          api_key = os.getenv('KRAKEN_API_KEY')
+          api_secret = os.getenv('KRAKEN_SECRET_KEY') # o KRAKEN_API_SECRET
+
+          print(f'KRAKEN_API_KEY trovata: {bool(api_key)}')
+          print(f'KRAKEN_SECRET_KEY trovata: {bool(api_secret)}')
+          "
