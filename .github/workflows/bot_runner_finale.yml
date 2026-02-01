@@ -14,7 +14,7 @@ jobs:
           python -c "import os; print('--- ELENCO FILE NELLA CARTELLA ---'); print(os.listdir('.'))"
 
       - name: Creazione file .env (Fix Codifica)
-        shell: pwsh # Usa PowerShell Core se disponibile o forza la codifica
+        shell: powershell
         run: |
           $content = @(
             "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}",
@@ -23,8 +23,9 @@ jobs:
             "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}",
             "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
           )
-          # Il segreto è l'uso di UTF8 senza BOM
-          [System.IO.File]::WriteAllLines("$(pwd)\.env", $content)
+          # Specifichiamo esplicitamente UTF8 senza BOM usando la classe .NET
+          $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllLines("$(Get-Location)\.env", $content, $utf8NoBom)
 
       - name: Esegui il Bot
         env:
