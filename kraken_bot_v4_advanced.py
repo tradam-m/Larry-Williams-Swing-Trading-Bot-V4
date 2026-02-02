@@ -1034,15 +1034,19 @@ class TradingBotV4:
     
     def open_position(self, 
             pair: TradingPair,
-            analysis_result: dict):
-        current_price = analysis_result.get('current_price') if 'current_price' in analysis_result else None
-        capital = analysis_result.get('capital') if 'capital' in analysis_result else None
-        leverage = analysis_result.get('leverage') if 'leverage' in analysis_result else self.config.LEVERAGE
-        signal = analysis_result.get('final_signal') if 'final_signal' in analysis_result else None
-        confidence = analysis_result.get('confidence') if 'confidence' in analysis_result else None
+            params: dict):
+        # Estraiamo i dati dal pacchetto 'params' 📦
+        capital = params['capital']
+        price = params['price']
+        leverage = params['leverage']
+        analysis = params['analysis']  # Qui c'è il "perché" dell'AI
+        data = params['data']
+        signal = analysis.get('final_signal') if 'final_signal' in analysis else None
+        confidence = analysis.get('confidence') if 'confidence' in analysis else None
 
+        print(f"DEBUG: L'AI ha deciso di entrare perché: {analysis.get('reason', 'N/A')}")
         # Calcolare volume
-        volume = (capital * leverage) / current_price
+        volume = (capital * leverage) / price
 
         # Verifica volume minimo
         if volume < pair.min_volume:
@@ -1051,7 +1055,7 @@ class TradingBotV4:
 
         try:
             print(f"\n🟢 Apertura {signal} su {pair.yf_symbol}")
-            print(f"   Prezzo: ${current_price:.4f}")
+            print(f"   Prezzo: ${price:.4f}")
             print(f"   Capitale: ${capital:.2f}")
             print(f"   Leva: {leverage}x")
             print(f"   Volume: {volume:.8f}")
@@ -1060,14 +1064,14 @@ class TradingBotV4:
             # Salva sempre type e vol per la chiusura
             trade_record = {
                 'symbol': pair.yf_symbol,
-                'entry_price': current_price,
+                'entry_price': price,
                 'volume': volume,
                 'leverage': leverage,
                 'capital': capital,
                 'signal': signal,
                 'confidence': confidence,
                 'timestamp': datetime.now(),
-                'v4_data': analysis_result.get('v4_data', {}),
+                'v4_data': analysis.get('v4_data', {}),
                 'closed': False,
                 'mode': 'SIMULATION' if self.config.DRY_RUN else 'REAL',
                 'type': 'long' if signal == 'BUY' else 'short',
@@ -1091,8 +1095,8 @@ class TradingBotV4:
 
             # Notifica V4
             self._send_v4_notification(
-                pair, signal, current_price, volume, leverage, 
-                confidence, analysis_result['reasons'], analysis_result.get('v4_data', {})
+                pair, signal, price, volume, leverage, 
+                confidence, analysis['reasons'], analysis.get('v4_data', {})
             )
         except Exception as e:
             error_msg = str(e)
@@ -1412,14 +1416,17 @@ class TradingBotV4:
                 )
                 
                 # Abrir con valores ya calculados
-                self.open_position(
-                    sig['pair'],
-                    sig['analysis'],
-                    sig['data'],
-                    sig['current_price'],
-                    capital,
-                    leverage
-                )
+                # Creiamo il pacchetto di parametri per la funzione
+                params = {
+                    'analysis': sig['analysis'],
+                    'data': sig['data'],
+                    'price': sig['current_price'],
+                    'capital': capital,
+                    'leverage': leverage
+                }
+
+                # Chiamiamo la funzione passando solo il pair e il dizionario params
+                self.open_position(sig['pair'], params)
                 
                 # Restar margen usado para siguiente posición
                 margin_used = capital
