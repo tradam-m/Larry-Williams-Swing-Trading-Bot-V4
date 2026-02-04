@@ -633,9 +633,9 @@ class PositionManagerV3:
         return False, ""
     
     def close_position(self, pair: str, pos_type: str, volume: float, 
-                    motivo: str, pos_data: dict, current_price: float):
+                    reason: str, pos_data: dict, current_price: float):
         print(f"\n🔴 Chiudendo {pair} ({pos_type})")
-        print(f"   Motivo: {motivo}")
+        print(f"   Motivo: {reason}")
         
         leverage = int(float(pos_data.get('leverage', 1)))
         
