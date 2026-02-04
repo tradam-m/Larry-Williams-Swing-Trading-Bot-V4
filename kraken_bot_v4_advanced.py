@@ -132,10 +132,10 @@ class Config:
     MARGIN_SAFETY_FACTOR = 1.5
     
     # ══════════════════ Risk ══════════════════
-    BASE_STOP_LOSS = float(os.getenv('STOP_LOSS_PCT', '4.0'))
-    BASE_TAKE_PROFIT = float(os.getenv('TAKE_PROFIT_PCT', '8.0'))
+    BASE_STOP_LOSS = float(os.getenv('STOP_LOSS_PCT', '2.0'))
+    BASE_TAKE_PROFIT = float(os.getenv('TAKE_PROFIT_PCT', '3.5'))
     BASE_TRAILING_STOP = float(os.getenv('TRAILING_STOP_PCT', '2.5'))
-    MIN_PROFIT_FOR_TRAILING = float(os.getenv('MIN_PROFIT_FOR_TRAILING', '3.0'))
+    MIN_PROFIT_FOR_TRAILING = float(os.getenv('MIN_PROFIT_FOR_TRAILING', '1.8'))
     
     # ══════════════════ Strategy ══════════════════
     LOOKBACK_PERIOD = os.getenv('LOOKBACK_PERIOD', '180d')
@@ -1222,7 +1222,38 @@ class TradingBotV4:
             
             # Verificare posizioni aperte
             print("\n📊 Verificando posizioni APERTE...")
-            positions = self.kraken.get_open_positions()
+            
+            if self.config.DRY_RUN:
+                # In simulation mode, build positions from history to avoid duplicates
+                positions = {}
+                print("   🧪 [SIMULATION] Ricostruzione posizioni dallo storico...")
+                for trade in self.trades_history:
+                    if not trade.get('closed', False):
+                        symbol = trade.get('symbol')
+                        tp = next((p for p in self.config.TRADING_PAIRS if p.yf_symbol == symbol), None)
+                        if tp:
+                            pair_key = tp.kraken_pair
+                            vol = float(trade.get('volume', 0))
+                            cost = float(trade.get('entry_price', 0)) * vol
+                            lev = float(trade.get('leverage', 1))
+                            margin = cost / lev if lev > 0 else cost
+                            
+                            if pair_key in positions:
+                                p = positions[pair_key]
+                                p['vol'] = str(float(p['vol']) + vol)
+                                p['cost'] = str(float(p['cost']) + cost)
+                                p['margin'] = float(p.get('margin', 0)) + margin
+                            else:
+                                positions[pair_key] = {
+                                    'pair': pair_key,
+                                    'type': trade.get('type', 'long'),
+                                    'vol': str(vol),
+                                    'cost': str(cost),
+                                    'margin': margin,
+                                    'leverage': str(lev)
+                                }
+            else:
+                positions = self.kraken.get_open_positions()
             
             open_symbols = []
             total_margin_used = 0.0
