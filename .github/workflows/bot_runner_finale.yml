@@ -11,15 +11,7 @@ jobs:
       - name: Scarica i file
         uses: actions/checkout@v4
 
-      # --- INIZIO BLOCCO GPG ---
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-      # --- FINE BLOCCO GPG ---
+      # --- BLOCC GPG RIMOSSO (Non necessario e causava errori) ---
 
       - name: Configura Ambiente e Avvia Bot
         shell: powershell
