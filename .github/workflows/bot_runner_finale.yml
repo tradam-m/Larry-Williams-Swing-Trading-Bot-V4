@@ -6,9 +6,20 @@ on:
 jobs:
   run-trading-bot:
     runs-on: self-hosted
+    timeout-minutes: 43200 # 30 giorni (massimo consentito spesso è 72h, ma proviamo max)
     steps:
       - name: Scarica i file
         uses: actions/checkout@v4
+
+      # --- INIZIO BLOCCO GPG ---
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+      # --- FINE BLOCCO GPG ---
 
       - name: Configura Ambiente e Avvia Bot
         shell: powershell
