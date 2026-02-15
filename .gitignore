@@ -1,2 +1,10 @@
 .env
 __pycache__/
+.venv/
+*.log
+trades_v4.json
+rl_state.json
+reports/
+snapshots/
+artifact_latest/
+artifact_latest.zip

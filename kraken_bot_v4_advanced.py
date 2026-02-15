@@ -1159,6 +1159,95 @@ class TradingBotV4:
         
         self.telegram.send(msg)
     
+    def force_close_all_positions(self, reason: str = "🔄 Reset manuale richiesto") -> int:
+        """Chiude forzatamente tutte le posizioni aperte (simulazione o real)."""
+        print("\n🧹 Avvio chiusura forzata di tutte le posizioni...")
+        closed_count = 0
+
+        # Scarica i dati di mercato necessari per calcolare il PnL corrente
+        market_data = {}
+        for pair in self.config.TRADING_PAIRS:
+            try:
+                market_data[pair.yf_symbol] = self.get_market_data(pair.yf_symbol)
+            except Exception as e:
+                print(f"   ⚠️ Dati mancanti per {pair.yf_symbol}: {e}")
+
+        if self.config.DRY_RUN:
+            open_trades = [t for t in self.trades_history if not t.get('closed', False)]
+
+            if not open_trades:
+                print("   Nessuna posizione simulata aperta da chiudere.")
+                return 0
+
+            for trade in open_trades:
+                symbol = trade['symbol']
+                data = market_data.get(symbol)
+                if data is not None and not data.empty:
+                    current_price = float(data['Close'].iloc[-1])
+                else:
+                    current_price = trade['entry_price']
+                entry = trade['entry_price']
+                leverage = trade.get('leverage', 1)
+                is_short = trade.get('signal') == 'SELL'
+
+                if is_short:
+                    pnl_pct = ((entry - current_price) / entry) * 100 * leverage
+                else:
+                    pnl_pct = ((current_price - entry) / entry) * 100 * leverage
+
+                trade['closed'] = True
+                trade['exit_price'] = current_price
+                trade['exit_time'] = datetime.now()
+                trade['exit_reason'] = reason
+                trade['pnl_pct'] = pnl_pct
+                trade['profit_amount'] = (trade['capital'] * pnl_pct) / 100
+
+                print(f"   • {symbol} chiuso @ {current_price:.4f} ({pnl_pct:+.2f}%)")
+                closed_count += 1
+
+            self._save_trades_history()
+            print(f"✅ Chiuse {closed_count} posizioni in simulazione.")
+            return closed_count
+
+        # Modalita' REAL: chiude tramite API Kraken
+        positions = self.kraken.get_open_positions()
+        if not positions:
+            print("   Nessuna posizione reale aperta da chiudere.")
+            return 0
+
+        for pair_key, pos_data in positions.items():
+            trading_pair = next((tp for tp in self.config.TRADING_PAIRS if tp.kraken_pair == pair_key), None)
+            if not trading_pair:
+                continue
+
+            symbol = trading_pair.yf_symbol
+            data = market_data.get(symbol)
+            if data is None:
+                try:
+                    data = self.get_market_data(symbol)
+                    market_data[symbol] = data
+                except Exception as e:
+                    print(f"   ⚠️ Prezzo non disponibile per {symbol}: {e}")
+                    continue
+
+            current_price = float(data['Close'].iloc[-1])
+            pos_type = pos_data.get('type', 'long')
+            volume = float(pos_data.get('vol', 0))
+
+            self.position_mgr.close_position(
+                pair_key,
+                pos_type,
+                volume,
+                reason,
+                pos_data,
+                current_price
+            )
+            self._close_trade_in_history(symbol, current_price, reason)
+            closed_count += 1
+
+        print(f"✅ Chiuse {closed_count} posizioni reali.")
+        return closed_count
+    
     def run(self):
         """
         ═══════════════════════════════════════════════════════════════

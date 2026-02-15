@@ -55,7 +55,9 @@ jobs:
         continue-on-error: true
         uses: actions/cache@v4
         with:
-          path: rl_state.json
+          path: |
+            rl_state.json
+            trades_v4.json
           key: rl-state-${{ github.run_number }}
           restore-keys: |
             rl-state-
@@ -68,6 +70,13 @@ jobs:
             echo "✓ RL state initialized"
           else
             echo "✓ RL state loaded from cache"
+          fi
+
+          if [ ! -f trades_v4.json ]; then
+            echo '[]' > trades_v4.json
+            echo "✓ Trades history initialized"
+          else
+            echo "✓ Trades history loaded from cache"
           fi
 
       - name: 🚀 Run Bot V4 (Advanced AI)
@@ -184,7 +193,9 @@ jobs:
         if: always()
         uses: actions/cache@v4
         with:
-          path: rl_state.json
+          path: |
+            rl_state.json
+            trades_v4.json
           key: rl-state-${{ github.run_number }}
 
       # Subir logs como artifacts (para debugging)
@@ -196,6 +207,7 @@ jobs:
           path: |
             *.log
             rl_state.json
+            trades_v4.json
           retention-days: 7
 
       - name: ✅ Completed Successfully
