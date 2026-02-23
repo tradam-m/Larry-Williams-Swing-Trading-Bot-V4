@@ -208,7 +208,7 @@ jobs:
             *.log
             rl_state.json
             trades_v4.json
-          retention-days: 7
+          retention-days: 30
 
       - name: ✅ Completed Successfully
         if: success()
