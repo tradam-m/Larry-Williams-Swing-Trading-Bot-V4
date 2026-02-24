@@ -1,0 +1,55 @@
+name: Performance Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      period:
+        description: "Periodo report"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - 24h
+          - 48h
+          - 7d
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Load trades from cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            trades_v4.json
+          key: rl-state-${{ github.run_number }}
+          restore-keys: |
+            rl-state-
+
+      - name: Initialize trades if missing
+        run: |
+          if [ ! -f trades_v4.json ]; then
+            echo '[]' > trades_v4.json
+          fi
+
+      - name: Send Performance Report to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPORT_PERIOD: ${{ github.event.inputs.period || 'all' }}
+        run: python telegram_perf_report.py --period $REPORT_PERIOD

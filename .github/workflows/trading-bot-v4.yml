@@ -154,6 +154,15 @@ jobs:
           ML_CONFIDENCE_THRESHOLD: "0.6"
 
           # ═══════════════════════════════════════════════════════════
+          #            ACTIVE PAIRS  (true=on / false=off)
+          # ═══════════════════════════════════════════════════════════
+          PAIR_BTC: "true"
+          PAIR_ETH: "true"
+          PAIR_ADA: "true"
+          PAIR_SOL: "true"
+          PAIR_XRP: "true"
+
+          # ═══════════════════════════════════════════════════════════
           #            MODE
           # ═══════════════════════════════════════════════════════════
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}

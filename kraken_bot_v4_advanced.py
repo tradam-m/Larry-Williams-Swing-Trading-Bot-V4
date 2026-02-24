@@ -115,12 +115,17 @@ class Config:
     WEIGHT_TREND_FOLLOWING = float(os.getenv('WEIGHT_TREND_FOLLOWING', '0.20'))
     
     # ══════════════════ Multi-Asset ══════════════════
+    _ALL_PAIRS = [
+        ('BTC-USD', 'XBTUSD', 0.0001, 0.30, os.getenv('PAIR_BTC', 'true')),
+        ('ETH-USD', 'ETHUSD', 0.001,  0.25, os.getenv('PAIR_ETH', 'true')),
+        ('ADA-USD', 'ADAUSD', 1.0,    0.25, os.getenv('PAIR_ADA', 'true')),
+        ('SOL-USD', 'SOLUSD', 0.01,   0.20, os.getenv('PAIR_SOL', 'true')),
+        ('XRP-USD', 'XRPUSD', 1.0,    0.25, os.getenv('PAIR_XRP', 'true')),
+    ]
     TRADING_PAIRS = [
-        TradingPair('BTC-USD', 'XBTUSD', 0.0001, 0.30),
-        TradingPair('ETH-USD', 'ETHUSD', 0.001, 0.25),
-        TradingPair('ADA-USD', 'ADAUSD', 1.0, 0.25),
-        TradingPair('SOL-USD', 'SOLUSD', 0.01, 0.20),
-        TradingPair('XRP-USD', 'XRPUSD', 1.0, 0.25),
+        TradingPair(yf, kr, mv, al)
+        for yf, kr, mv, al, enabled in _ALL_PAIRS
+        if enabled.lower() == 'true'
     ]
     
     MAX_CORRELATION = float(os.getenv('MAX_CORRELATION', '0.7'))  # ← Debe tener 4 espacios

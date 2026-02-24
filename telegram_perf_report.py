@@ -136,26 +136,51 @@ def format_report(label, m, open_trades):
     return "\n".join(lines)
 
 
+PERIOD_HOURS = {"24h": 24, "48h": 48, "7d": 168, "all": None}
+
+
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--period", default=os.getenv("REPORT_PERIOD", "all"),
+                        choices=list(PERIOD_HOURS.keys()))
+    args = parser.parse_args()
+
     token   = os.getenv("TELEGRAM_BOT_TOKEN", "")
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
 
     all_trades = load_trades("trades_v4.json")
-
-    # Report ultime 24h
-    recent = filter_last_24h(all_trades)
-    m24, open24 = calc_metrics(recent)
-    msg24 = format_report("REPORT 24H", m24, open24)
-
-    # Report totale (escluse chiusure da reset manuale)
     valid = [t for t in all_trades if "Reset manuale" not in (t.get("exit_reason") or "")]
-    m_all, open_all = calc_metrics(valid)
-    msg_all = format_report("REPORT TOTALE (esclusi reset)", m_all, open_all)
 
     now = datetime.now().strftime("%d/%m/%Y %H:%M")
-    full_msg = f"<b>BOT V4 Performance - {now}</b>\n\n{msg24}\n\n{msg_all}"
+    hours = PERIOD_HOURS[args.period]
 
-    send_telegram(token, chat_id, full_msg)
+    if args.period == "all":
+        # Post-run automatico: 24h + totale
+        recent = filter_last_24h(valid)
+        m24, open24 = calc_metrics(recent)
+        m_all, open_all = calc_metrics(valid)
+        msg = (
+            f"<b>BOT V4 - {now}</b>\n\n"
+            f"{format_report('ULTIME 24H', m24, open24)}\n\n"
+            f"{format_report('TOTALE', m_all, open_all)}"
+        )
+    else:
+        # Report su periodo specifico richiesto manualmente
+        cutoff = datetime.now() - timedelta(hours=hours)
+        filtered = [
+            t for t in valid
+            if any(
+                t.get(k) and datetime.fromisoformat(t[k]) >= cutoff
+                for k in ("exit_time", "timestamp")
+                if t.get(k)
+            )
+        ]
+        m, open_t = calc_metrics(filtered)
+        label = f"REPORT {args.period.upper()} (al {now})"
+        msg = f"<b>BOT V4 - {now}</b>\n\n{format_report(label, m, open_t)}"
+
+    send_telegram(token, chat_id, msg)
 
 
 if __name__ == "__main__":
