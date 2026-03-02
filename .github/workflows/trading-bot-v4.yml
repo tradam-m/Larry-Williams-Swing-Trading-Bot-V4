@@ -33,10 +33,14 @@ jobs:
   trade:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
 
     steps:
       - name: 🔥 Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐍 Setup Python 3.11
         uses: actions/setup-python@v4
@@ -191,6 +195,25 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python telegram_perf_report.py
+
+      - name: 💾 Sync trades_v4_live.json nel repo
+        if: always()
+        run: |
+          if [ -f trades_v4.json ] && [ -s trades_v4.json ]; then
+            cp trades_v4.json trades_v4_live.json
+            git config user.name "GitHub Actions Bot"
+            git config user.email "actions@github.com"
+            git add trades_v4_live.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Auto-sync trades_v4_live.json [skip ci]"
+              git push
+              echo "✓ trades_v4_live.json aggiornato nel repo"
+            else
+              echo "✓ Nessuna modifica ai trade — skip commit"
+            fi
+          else
+            echo "⚠️ trades_v4.json non trovato o vuoto — skip sync"
+          fi
 
       # ✅ FIXED: Save RL state improved
       - name: 💾 LookSave RL State
