@@ -21,10 +21,44 @@ jobs:
           # Creiamo il file .env con i nomi esatti che il bot si aspetta
           $content = @(
             "KRAKEN_API_KEY=${{ secrets.KRAKEN_API_KEY }}",
-            "KRAKEN_API_SECRET=${{ secrets.KRAKEN_API_SECRET }}", # Corretto da KRAKEN_SECRET_KEY
+            "KRAKEN_API_SECRET=${{ secrets.KRAKEN_API_SECRET }}",
             "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}",
             "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}",
-            "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
+            "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}",
+            "",
+            "# Timeframe: 4h riduce il rumore rispetto a 1h",
+            "CANDLE_INTERVAL=4h",
+            "LOOKBACK_PERIOD=180d",
+            "",
+            "# Ensemble: filtra i segnali deboli",
+            "USE_ENSEMBLE_SYSTEM=true",
+            "MIN_ENSEMBLE_CONSENSUS=0.6",
+            "MIN_ENSEMBLE_CONFIDENCE=0.6",
+            "WEIGHT_SWING=0.30",
+            "WEIGHT_MOMENTUM=0.25",
+            "WEIGHT_MEAN_REVERSION=0.25",
+            "WEIGHT_TREND_FOLLOWING=0.20",
+            "",
+            "# Coppie attive: solo ETH e BTC (migliori performance storiche)",
+            "PAIR_BTC=true",
+            "PAIR_ETH=true",
+            "PAIR_ADA=false",
+            "PAIR_SOL=false",
+            "PAIR_XRP=false",
+            "",
+            "# Risk management migliorato",
+            "STOP_LOSS_PCT=4.0",
+            "TAKE_PROFIT_PCT=8.0",
+            "TRAILING_STOP_PCT=3.0",
+            "MIN_PROFIT_FOR_TRAILING=3.0",
+            "LEVERAGE=3",
+            "MAX_POSITIONS=1",
+            "",
+            "# Regime e ML",
+            "REGIME_LOOKBACK=30",
+            "USE_ML_VALIDATION=true",
+            "ML_CONFIDENCE_THRESHOLD=0.6",
+            "USE_VOLUME_FILTER=true"
           )
 
           $utf8NoBom = New-Object System.Text.UTF8Encoding $false

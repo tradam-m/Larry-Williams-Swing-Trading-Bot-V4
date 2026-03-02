@@ -145,7 +145,7 @@ jobs:
           #            STRATEGY SETTINGS (v4)
           # ═══════════════════════════════════════════════════════════
           LOOKBACK_PERIOD: "180d"
-          CANDLE_INTERVAL: "1h"
+          CANDLE_INTERVAL: "4h"
           USE_VOLUME_FILTER: "true"
           REGIME_LOOKBACK: "30"
 
@@ -158,9 +158,9 @@ jobs:
           # ═══════════════════════════════════════════════════════════
           PAIR_BTC: "true"
           PAIR_ETH: "true"
-          PAIR_ADA: "true"
-          PAIR_SOL: "true"
-          PAIR_XRP: "true"
+          PAIR_ADA: "false"
+          PAIR_SOL: "false"
+          PAIR_XRP: "false"
 
           # ═══════════════════════════════════════════════════════════
           #            MODE

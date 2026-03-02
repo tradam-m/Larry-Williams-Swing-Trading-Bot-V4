@@ -1482,11 +1482,27 @@ class TradingBotV4:
                     continue
                 
                 print(f"\n   🎯 {pair.yf_symbol}: Segnale {signal} rilevato")
-                
+
+                # ── Filtro Regime: nessuna nuova posizione in mercato VOLATILE ──
+                regime_entry = RegimeDetector.detect(data, self.config.REGIME_LOOKBACK)
+                if regime_entry == 'VOLATILE':
+                    print(f"   🚫 {pair.yf_symbol}: saltato – mercato VOLATILE (rischio eccessivo)")
+                    continue
+
+                # ── Filtro Trend SMA200: opera solo nella direzione del trend principale ──
+                if len(data) >= 200:
+                    sma_200 = data['Close'].rolling(200).mean().iloc[-1]
+                    if signal == 'BUY' and current_price < sma_200:
+                        print(f"   🚫 {pair.yf_symbol}: BUY rifiutato – prezzo ({current_price:.4f}) sotto SMA200 ({sma_200:.4f})")
+                        continue
+                    elif signal == 'SELL' and current_price > sma_200:
+                        print(f"   🚫 {pair.yf_symbol}: SELL rifiutato – prezzo ({current_price:.4f}) sopra SMA200 ({sma_200:.4f})")
+                        continue
+
                 # ═══════════════════════════════════════════════════
                 #       ANÁLISIS COMPLETO V4
                 # ═══════════════════════════════════════════════════
-                
+
                 analysis = self.analyze_trading_opportunity(
                     pair, data, (signal, signal_price, confidence)
                 )
