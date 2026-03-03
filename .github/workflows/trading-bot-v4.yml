@@ -11,7 +11,7 @@ on:
       dry_run:
         description: "Modo Simulación (true) o Real (false)"
         required: false
-        default: "false"
+        default: "true"
       use_sentiment:
         description: "Usar Sentiment Analysis"
         required: false
@@ -132,7 +132,7 @@ jobs:
           #            MULTI-ASSET TRADING (v4)
           # ═══════════════════════════════════════════════════════════
           MAX_CORRELATION: "0.7"
-          MAX_POSITIONS: "3"
+          MAX_POSITIONS: "5"
 
           # ═══════════════════════════════════════════════════════════
           #            RISK MANAGEMENT
@@ -162,14 +162,14 @@ jobs:
           # ═══════════════════════════════════════════════════════════
           PAIR_BTC: "true"
           PAIR_ETH: "true"
-          PAIR_ADA: "false"
-          PAIR_SOL: "false"
-          PAIR_XRP: "false"
+          PAIR_ADA: "true"
+          PAIR_SOL: "true"
+          PAIR_XRP: "true"
 
           # ═══════════════════════════════════════════════════════════
           #            MODE
           # ═══════════════════════════════════════════════════════════
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
 
         run: |
           echo "═══════════════════════════════════════════════════════════════════"
