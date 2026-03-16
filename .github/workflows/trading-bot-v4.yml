@@ -11,7 +11,7 @@ on:
       dry_run:
         description: "Modo Simulación (true) o Real (false)"
         required: false
-        default: "false"
+        default: "true"
       use_sentiment:
         description: "Usar Sentiment Analysis"
         required: false
@@ -169,7 +169,7 @@ jobs:
           # ═══════════════════════════════════════════════════════════
           #            MODE
           # ═══════════════════════════════════════════════════════════
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
 
         run: |
           echo "═══════════════════════════════════════════════════════════════════"
