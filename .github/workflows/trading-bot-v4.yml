@@ -2,8 +2,8 @@ name: Kraken Trading Bot V4 - Advanced AI
 
 on:
   # Automático cada 15 minutios
-  schedule:
-    - cron: "*/15 * * * *"
+  # schedule:
+  #  - cron: "*/15 * * * *"
 
   # Manual con opciones
   workflow_dispatch:
