@@ -116,11 +116,11 @@ class Config:
     
     # ══════════════════ Multi-Asset ══════════════════
     _ALL_PAIRS = [
-        ('BTC-USD', 'XBTUSD', 0.0001, 0.30, os.getenv('PAIR_BTC', 'true')),
-        ('ETH-USD', 'ETHUSD', 0.001,  0.25, os.getenv('PAIR_ETH', 'true')),
-        ('ADA-USD', 'ADAUSD', 1.0,    0.25, os.getenv('PAIR_ADA', 'true')),
-        ('SOL-USD', 'SOLUSD', 0.01,   0.20, os.getenv('PAIR_SOL', 'true')),
-        ('XRP-USD', 'XRPUSD', 1.0,    0.25, os.getenv('PAIR_XRP', 'true')),
+        ('BTC-EUR', 'XBTEUR', 0.0001, 0.30, os.getenv('PAIR_BTC', 'true')),
+        ('ETH-EUR', 'ETHEUR', 0.001,  0.25, os.getenv('PAIR_ETH', 'true')),
+        ('ADA-EUR', 'ADAEUR', 1.0,    0.25, os.getenv('PAIR_ADA', 'true')),
+        ('SOL-EUR', 'SOLEUR', 0.01,   0.20, os.getenv('PAIR_SOL', 'true')),
+        ('XRP-EUR', 'XRPEUR', 1.0,    0.25, os.getenv('PAIR_XRP', 'true')),
     ]
     TRADING_PAIRS = [
         TradingPair(yf, kr, mv, al)
@@ -135,6 +135,7 @@ class Config:
     LEVERAGE = int(os.getenv('LEVERAGE', '3'))
     MIN_BALANCE = float(os.getenv('MIN_BALANCE', '1.0'))
     MARGIN_SAFETY_FACTOR = 1.5
+    CAPITAL_PER_TRADE = float(os.getenv('CAPITAL_PER_TRADE', '0.03'))
     
     # ══════════════════ Risk ══════════════════
     BASE_STOP_LOSS = float(os.getenv('STOP_LOSS_PCT', '2.0'))
@@ -1017,6 +1018,12 @@ class TradingBotV4:
                     training=True  # Modo entrenamiento
                 )
                 
+                # Cap: il RL non può superare CAPITAL_PER_TRADE
+                max_capital = available_margin * self.config.CAPITAL_PER_TRADE
+                if capital > max_capital:
+                    print(f"   ⚠️ RL voleva ${capital:.2f}, limitato a ${max_capital:.2f} (CAPITAL_PER_TRADE={self.config.CAPITAL_PER_TRADE:.0%})")
+                    capital = max_capital
+                
                 analysis_result['v4_data']['rl_sizing'] = {
                     'capital': capital,
                     'leverage': leverage,
@@ -1031,7 +1038,7 @@ class TradingBotV4:
         
         # Fallback: sizing tradizionale
         print(f"\n   💰 Position Sizing tradizionale")
-        allocation = pair.allocation
+        allocation = min(pair.allocation, self.config.CAPITAL_PER_TRADE)
         capital = available_margin * allocation
         leverage = self.config.LEVERAGE
         
@@ -1106,12 +1113,8 @@ class TradingBotV4:
         except Exception as e:
             error_msg = str(e)
             print(f"   ❌ Errore: {error_msg}")
-            self.telegram.send(f"❌ Errore in {pair.yf_symbol}: {error_msg}")
-            
-        except Exception as e:
-            error_msg = str(e)
-            print(f"   ❌ Errore: {error_msg}")
-            self.telegram.send(f"❌ Errore in {pair.yf_symbol}: {error_msg}")
+            if "EOrder:Insufficient funds" not in error_msg:
+                self.telegram.send(f"❌ Errore in {pair.yf_symbol}: {error_msg}")
     
     def _send_v4_notification(self, pair, signal, price, volume, 
                             leverage, confidence, reasons, v4_data):
@@ -1479,6 +1482,11 @@ class TradingBotV4:
                 
                 if not signal:
                     print(f"   - {pair.yf_symbol}: nessun segnale swing")
+                    continue
+                
+                # ── Filtro SELL su spot: con leva 1 non si può shortare ──
+                if signal == 'SELL' and self.config.LEVERAGE <= 1:
+                    print(f"   🚫 {pair.yf_symbol}: SELL ignorato – leva {self.config.LEVERAGE}x (spot), short non disponibile")
                     continue
                 
                 print(f"\n   🎯 {pair.yf_symbol}: Segnale {signal} rilevato")

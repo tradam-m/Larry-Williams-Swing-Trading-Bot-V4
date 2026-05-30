@@ -165,24 +165,20 @@ class SentimentAnalyzer:
                 # 0 = -1 (Extreme Fear), 50 = 0 (Neutral), 100 = 1 (Extreme Greed)
                 fng_norm_score = (fng_raw_score - 50) / 50.0
                 scores.append(fng_norm_score)
-                weights.append(0.40) # 40% peso (Indicador fuerte de mercado CS)
-            
+                weights.append(0.20) # 20% peso (ridotto: indicatore di mercato generale, non specifico)
+
             # Verificar que tengamos al menos una fuente
             if not scores:
                 return None
-            
+
             # Calculate weighted average
             total_weight = sum(weights)
             overall = sum(s * w for s, w in zip(scores, weights)) / total_weight if total_weight > 0 else 0
-            
+
             # Confidence basada en disponibilidad de datos
             # Ahora tenemos 4 fuentes posibles
-            confidence = len(scores) / 4.0 
+            confidence = len(scores) / 4.0
             if confidence > 1.0: confidence = 1.0
-            
-            # Ajustar confidence si tenemos FnG (es muy fiable como dato)
-            if fng_raw_score is not None:
-                confidence = max(confidence, 0.6)
 
             sentiment = SentimentScore(
                 overall_score=overall,
