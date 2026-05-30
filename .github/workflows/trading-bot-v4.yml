@@ -36,12 +36,12 @@ jobs:
 
     steps:
       - name: 🔥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐍 Setup Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -55,7 +55,7 @@ jobs:
       - name: 📂 Load RL State
         id: load-rl
         continue-on-error: true
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: |
             rl_state.json
@@ -228,7 +228,7 @@ jobs:
 
       - name: 📤 Cache RL State
         if: always()
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: |
             rl_state.json
@@ -238,7 +238,7 @@ jobs:
       # Subir logs como artifacts (para debugging)
       - name: 📤 Subir logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: trading-logs-${{ github.run_number }}
           path: |
