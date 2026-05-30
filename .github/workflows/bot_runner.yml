@@ -1,2 +1,0 @@
-- name: Avvia il Bot
-        run: python start_live_simulation.py
