@@ -8,3 +8,4 @@ reports/
 snapshots/
 artifact_latest/
 artifact_latest.zip
+.claude/worktrees/
