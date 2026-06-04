@@ -1,1 +1,40 @@
-[]
+[
+  {
+    "symbol": "SOL-EUR",
+    "entry_price": 61.650001525878906,
+    "volume": 0.13476846381767468,
+    "leverage": 1,
+    "capital": 8.308476,
+    "signal": "SELL",
+    "confidence": 0.6402411548043375,
+    "timestamp": "2026-06-04T04:17:22.177624",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.7600000000000001,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.6402411548043375,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.62)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: None (0.00)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: SELL (0.66)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 8.308476,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.13476846381767468
+  }
+]
