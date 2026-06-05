@@ -41,5 +41,43 @@
     "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 1.00)",
     "pnl_pct": 4.168693643495542,
     "profit_amount": 0.34635491088335274
+  },
+  {
+    "symbol": "XRP-EUR",
+    "entry_price": 0.9704999923706055,
+    "volume": 7.857351942243007,
+    "leverage": 1,
+    "capital": 7.62556,
+    "signal": "SELL",
+    "confidence": 0.6136180241552402,
+    "timestamp": "2026-06-05T16:56:18.733145",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.7600000000000001,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.6136180241552402,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.62)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: None (0.00)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: SELL (0.60)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.62556,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 7.857351942243007
   }
 ]
