@@ -84,5 +84,81 @@
     "exit_reason": "\ud83d\uded1 Stop Loss: -3.21%",
     "pnl_pct": -3.214843024518421,
     "profit_amount": -0.24514978374046692
+  },
+  {
+    "symbol": "BTC-EUR",
+    "entry_price": 55296.62890625,
+    "volume": 0.00014400302798747973,
+    "leverage": 1,
+    "capital": 7.962882,
+    "signal": "SELL",
+    "confidence": 0.6629608979297135,
+    "timestamp": "2026-06-08T16:11:24.562898",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.84,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.6629608979297135,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.88)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.41)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.962882,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.00014400302798747973
+  },
+  {
+    "symbol": "XRP-EUR",
+    "entry_price": 1.0145000219345093,
+    "volume": 7.613598199112331,
+    "leverage": 1,
+    "capital": 7.72399554,
+    "signal": "SELL",
+    "confidence": 0.6025164742903347,
+    "timestamp": "2026-06-08T16:11:25.357043",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.84,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.6025164742903347,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.62)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.58)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.72399554,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 7.613598199112331
   }
 ]
