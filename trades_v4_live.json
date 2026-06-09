@@ -156,9 +156,14 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "short",
-    "vol": 7.613598199112331
+    "vol": 7.613598199112331,
+    "exit_price": 0.9897000193595886,
+    "exit_time": "2026-06-09T20:48:32.626959",
+    "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 1.00)",
+    "pnl_pct": 2.444554168429738,
+    "profit_amount": 0.18881725494239704
   }
 ]
