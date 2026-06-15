@@ -118,10 +118,15 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "short",
-    "vol": 0.00014400302798747973
+    "vol": 0.00014400302798747973,
+    "exit_price": 57263.41015625,
+    "exit_time": "2026-06-15T12:52:48.115442",
+    "exit_reason": "\ud83d\uded1 Stop Loss: -3.56%",
+    "pnl_pct": -3.5567832775746315,
+    "profit_amount": -0.28322245538900037
   },
   {
     "symbol": "XRP-EUR",
