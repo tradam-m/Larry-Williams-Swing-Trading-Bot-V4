@@ -170,5 +170,43 @@
     "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 1.00)",
     "pnl_pct": 2.444554168429738,
     "profit_amount": 0.18881725494239704
+  },
+  {
+    "symbol": "BTC-EUR",
+    "entry_price": 57421.69140625,
+    "volume": 0.00014639854372323506,
+    "leverage": 1,
+    "capital": 8.406452000000002,
+    "signal": "SELL",
+    "confidence": 0.7402804278578836,
+    "timestamp": "2026-06-15T15:08:52.074846",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.6,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.7402804278578836,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.88)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.58)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 8.406452000000002,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.00014639854372323506
   }
 ]
