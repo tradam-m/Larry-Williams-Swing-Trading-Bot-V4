@@ -213,5 +213,81 @@
     "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 0.62)",
     "pnl_pct": 3.6818349011047857,
     "profit_amount": 0.3095116836806213
+  },
+  {
+    "symbol": "XRP-EUR",
+    "entry_price": 0.921999990940094,
+    "volume": 8.131826544114517,
+    "leverage": 1,
+    "capital": 7.497544,
+    "signal": "SELL",
+    "confidence": 0.7577692380766564,
+    "timestamp": "2026-06-27T00:14:30.036955",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.6999999999999998,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.7577692380766564,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (1.00)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.47)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.497544,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 8.131826544114517
+  },
+  {
+    "symbol": "ETH-EUR",
+    "entry_price": 1385.8199462890625,
+    "volume": 0.005247880649628804,
+    "leverage": 1,
+    "capital": 7.27261768,
+    "signal": "SELL",
+    "confidence": 0.7577303693576874,
+    "timestamp": "2026-06-27T00:14:30.684135",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.6999999999999998,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.7577303693576874,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (1.00)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.47)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.27261768,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.005247880649628804
   }
 ]
