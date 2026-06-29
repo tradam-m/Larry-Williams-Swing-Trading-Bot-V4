@@ -247,10 +247,15 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "short",
-    "vol": 8.131826544114517
+    "vol": 8.131826544114517,
+    "exit_price": 0.9164999723434448,
+    "exit_time": "2026-06-29T05:45:33.124191",
+    "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 1.00)",
+    "pnl_pct": 0.5965313070167403,
+    "profit_amount": 0.0447251972173552
   },
   {
     "symbol": "ETH-EUR",
