@@ -299,5 +299,43 @@
     "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 1.00)",
     "pnl_pct": -0.1226763438309531,
     "profit_amount": -0.008921781470627485
+  },
+  {
+    "symbol": "ETH-EUR",
+    "entry_price": 1414.3800048828125,
+    "volume": 0.005365179070548817,
+    "leverage": 1,
+    "capital": 7.588401999999999,
+    "signal": "SELL",
+    "confidence": 0.7954545454545454,
+    "timestamp": "2026-07-01T14:23:23.595256",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.7800000000000001,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.7954545454545454,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.75)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.85)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.588401999999999,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.005365179070548817
   }
 ]
