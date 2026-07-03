@@ -462,10 +462,15 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "long",
-    "vol": 50.51915429621122
+    "vol": 50.51915429621122,
+    "exit_price": 0.15690000355243683,
+    "exit_time": "2026-07-03T23:38:41.574607",
+    "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale SELL, conf 0.72)",
+    "pnl_pct": -1.1342158914354192,
+    "profit_amount": -0.09093451145835414
   },
   {
     "symbol": "XRP-EUR",
