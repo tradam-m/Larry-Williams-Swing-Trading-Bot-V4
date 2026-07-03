@@ -466,5 +466,43 @@
     "mode": "SIMULATION",
     "type": "long",
     "vol": 50.51915429621122
+  },
+  {
+    "symbol": "XRP-EUR",
+    "entry_price": 0.989799976348877,
+    "volume": 7.965969275009213,
+    "leverage": 1,
+    "capital": 7.8847162,
+    "signal": "BUY",
+    "confidence": 0.6037586393558805,
+    "timestamp": "2026-07-03T19:51:06.207853",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.58,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "BUY",
+        "confidence": 0.6037586393558805,
+        "consensus": 0.6666666666666666,
+        "votes": {
+          "StrategyType.SWING": "swing: BUY (1.00)",
+          "StrategyType.MOMENTUM": "momentum: BUY (0.73)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.66)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 7.8847162,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "long",
+    "vol": 7.965969275009213
   }
 ]
