@@ -385,5 +385,43 @@
     "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 1.00)",
     "pnl_pct": -0.041619683536602683,
     "profit_amount": -0.0033085534131675476
+  },
+  {
+    "symbol": "ADA-EUR",
+    "entry_price": 0.15320000052452087,
+    "volume": 52.37381183112822,
+    "leverage": 1,
+    "capital": 8.023668,
+    "signal": "BUY",
+    "confidence": 0.665,
+    "timestamp": "2026-07-03T17:48:43.797050",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.58,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "BUY",
+        "confidence": 0.665,
+        "consensus": 0.75,
+        "votes": {
+          "StrategyType.SWING": "swing: BUY (1.00)",
+          "StrategyType.MOMENTUM": "momentum: BUY (0.90)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.27)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: BUY (0.70)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 8.023668,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "long",
+    "vol": 52.37381183112822
   }
 ]
