@@ -505,10 +505,15 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "long",
-    "vol": 7.965969275009213
+    "vol": 7.965969275009213,
+    "exit_price": 0.9646000266075134,
+    "exit_time": "2026-07-14T17:52:55.404341",
+    "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale SELL, conf 0.90)",
+    "pnl_pct": -2.5459638657822357,
+    "profit_amount": -0.2007420253714782
   },
   {
     "symbol": "ADA-EUR",
