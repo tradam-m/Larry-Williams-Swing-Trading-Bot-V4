@@ -557,5 +557,43 @@
     "exit_reason": "\ud83d\uded1 Stop Loss: -3.25%",
     "pnl_pct": -3.248245742624098,
     "profit_amount": -0.260157188195636
+  },
+  {
+    "symbol": "XRP-EUR",
+    "entry_price": 0.9661999940872192,
+    "volume": 14.499534346649313,
+    "leverage": 1,
+    "capital": 14.009449999999998,
+    "signal": "SELL",
+    "confidence": 0.8221185656091143,
+    "timestamp": "2026-07-14T18:31:05.092653",
+    "v4_data": {
+      "sentiment": {
+        "overall": -0.56,
+        "news": 0.0,
+        "social": 0.0,
+        "signal_type": "BEARISH"
+      },
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.8221185656091143,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.90)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.73)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 14.009449999999998,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 14.499534346649313
   }
 ]
