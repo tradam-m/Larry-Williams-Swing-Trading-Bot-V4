@@ -60,6 +60,7 @@ jobs:
           path: |
             rl_state.json
             trades_v4.json
+            peak_prices.json
           key: rl-state-${{ github.run_number }}
           restore-keys: |
             rl-state-
@@ -233,6 +234,7 @@ jobs:
           path: |
             rl_state.json
             trades_v4.json
+            peak_prices.json
           key: rl-state-${{ github.run_number }}
 
       # Subir logs como artifacts (para debugging)
