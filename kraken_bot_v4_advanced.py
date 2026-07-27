@@ -175,11 +175,37 @@ class KrakenClient:
         return base64.b64encode(signature.digest()).decode()
     
     def _request(self, endpoint: str, data: dict = None, private: bool = False) -> dict:
+        # Mai retry su AddOrder: un timeout dopo invio riuscito creerebbe ordini duplicati
+        retryable = endpoint != '/0/private/AddOrder'
+        max_attempts = 3 if retryable else 1
+        last_error = None
+
+        for attempt in range(max_attempts):
+            try:
+                return self._request_once(endpoint, data, private)
+            except requests.exceptions.RequestException as e:
+                last_error = e
+            except Exception as e:
+                msg = str(e)
+                transient = ('EAPI:Rate limit' in msg or 'EService:Unavailable' in msg
+                             or 'EService:Busy' in msg or 'EGeneral:Temporary' in msg)
+                if not (retryable and transient):
+                    raise
+                last_error = e
+
+            if attempt < max_attempts - 1:
+                wait = 2 ** attempt
+                print(f"   ⚠️ API transient error ({last_error}), retry in {wait}s...")
+                time.sleep(wait)
+
+        raise last_error
+
+    def _request_once(self, endpoint: str, data: dict = None, private: bool = False) -> dict:
         url = self.api_url + endpoint
-        
+
         if private:
-            data = data or {}
-            data['nonce'] = int(time.time() * 1000)
+            data = dict(data) if data else {}
+            data['nonce'] = int(time.time() * 1000000)
             headers = {
                 'API-Key': self.api_key,
                 'API-Sign': self._sign(endpoint, data)
@@ -187,13 +213,13 @@ class KrakenClient:
             response = self.session.post(url, data=data, headers=headers, timeout=30)
         else:
             response = self.session.get(url, params=data, timeout=30)
-        
+
         response.raise_for_status()
         result = response.json()
-        
+
         if result.get('error') and len(result['error']) > 0:
             raise Exception(f"Kraken error: {result['error']}")
-        
+
         return result.get('result', {})
     
     def get_balance(self) -> Tuple[float, str]:
@@ -232,10 +258,14 @@ class KrakenClient:
                 vol = float(pos_data.get('vol', 0))
                 vol_closed = float(pos_data.get('vol_closed', 0))
                 open_vol = vol - vol_closed
-                
+
                 if open_vol <= 0:
                     continue
-                
+
+                # Kraken restituisce type 'buy'/'sell': il resto del bot usa 'long'/'short'
+                raw_type = str(pos_data.get('type', 'buy')).lower()
+                pos_data['type'] = 'short' if raw_type in ('sell', 'short') else 'long'
+
                 pair = pos_data.get('pair', 'UNKNOWN')
                 
                 if pair in consolidated:
@@ -256,20 +286,28 @@ class KrakenClient:
                 return {}
             raise
     
-    def place_order(self, pair: str, order_type: str, volume: float, 
-                leverage: int = None, reduce_only: bool = False) -> dict:
+    def place_order(self, pair: str, order_type: str, volume: float,
+                leverage: int = None, reduce_only: bool = False,
+                close_stop_price: float = None) -> dict:
+        # floor, non round: arrotondare in su può superare il saldo disponibile
+        volume_floored = int(volume * 1e8) / 1e8
         data = {
             'pair': pair,
             'type': order_type,
             'ordertype': 'market',
-            'volume': str(round(volume, 8))
+            'volume': f"{volume_floored:.8f}"
         }
-        
+
         if leverage and leverage > 1:
             data['leverage'] = str(leverage)
             if reduce_only:
                 data['reduce_only'] = 'true'
-        
+
+        # Stop-loss lato exchange: protegge anche se il bot non gira
+        if close_stop_price and not reduce_only:
+            data['close[ordertype]'] = 'stop-loss'
+            data['close[price]'] = f"{close_stop_price:.6g}"
+
         return self._request('/0/private/AddOrder', data=data, private=True)
     
     def close_position(self, pair: str, position_type: str, volume: float, 
@@ -588,12 +626,32 @@ class Telegram:
 
 
 class PositionManagerV3:
+    PEAK_PRICES_FILE = 'peak_prices.json'
+
     def __init__(self, config: Config, kraken: KrakenClient, telegram: Telegram):
         self.config = config
         self.kraken = kraken
         self.telegram = telegram
-        self.peak_prices = {}
+        # Persistito su file: ogni run è un processo nuovo (GitHub Actions),
+        # senza persistenza il trailing stop si resetta ad ogni ciclo
+        self.peak_prices = self._load_peak_prices()
         self.position_regimes = {}
+
+    def _load_peak_prices(self) -> dict:
+        try:
+            if os.path.exists(self.PEAK_PRICES_FILE):
+                with open(self.PEAK_PRICES_FILE, 'r') as f:
+                    return {k: float(v) for k, v in json.load(f).items()}
+        except Exception as e:
+            print(f"   ⚠️ Errore caricamento peak prices: {e}")
+        return {}
+
+    def _save_peak_prices(self):
+        try:
+            with open(self.PEAK_PRICES_FILE, 'w') as f:
+                json.dump(self.peak_prices, f)
+        except Exception as e:
+            print(f"   ⚠️ Errore salvataggio peak prices: {e}")
     
     def check_position(self, pos_id: str, pos_data: dict, current_price: float,
                     regime_params: Dict[str, float]) -> Tuple[bool, str]:
@@ -619,12 +677,15 @@ class PositionManagerV3:
         if pnl_pct >= self.config.MIN_PROFIT_FOR_TRAILING:
             if pos_id not in self.peak_prices:
                 self.peak_prices[pos_id] = current_price
-            
+                self._save_peak_prices()
+
             if pos_type == 'long' and current_price > self.peak_prices[pos_id]:
                 self.peak_prices[pos_id] = current_price
+                self._save_peak_prices()
             elif pos_type == 'short' and current_price < self.peak_prices[pos_id]:
                 self.peak_prices[pos_id] = current_price
-            
+                self._save_peak_prices()
+
             peak = self.peak_prices[pos_id]
             if pos_type == 'long':
                 peak_pnl = ((peak - entry_price) / entry_price) * 100 * leverage
@@ -677,8 +738,12 @@ class PositionManagerV3:
 """
         if self.config.DRY_RUN:
             msg = "🧪 <b>SIMULAZIONE</b>\n" + msg
-        
+
         self.telegram.send(msg)
+
+        if pair in self.peak_prices:
+            del self.peak_prices[pair]
+            self._save_peak_prices()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1065,6 +1130,11 @@ class TradingBotV4:
             print(f"   ⚠️ Volume {volume:.8f} < minimo {pair.min_volume}")
             return
 
+        # La leva finale (RL) può differire da config.LEVERAGE: short su spot impossibile
+        if signal == 'SELL' and (not leverage or leverage <= 1):
+            print(f"   🚫 {pair.yf_symbol}: SELL con leva {leverage}x non eseguibile su spot, salto")
+            return
+
         try:
             print(f"\n🟢 Apertura {signal} su {pair.yf_symbol}")
             print(f"   Prezzo: ${price:.4f}")
@@ -1073,7 +1143,32 @@ class TradingBotV4:
             print(f"   Volume: {volume:.8f}")
             print(f"   Confidenza: {confidence:.2%}")
 
-            # Salva sempre type e vol per la chiusura
+            # Prima l'ordine, poi lo storico: se l'ordine fallisce
+            # non deve restare una posizione fantasma nello storico
+            if not self.config.DRY_RUN:
+                order_type = 'buy' if signal == 'BUY' else 'sell'
+
+                # Stop-loss lato exchange: BASE_STOP_LOSS è in % di ROE,
+                # quindi il movimento prezzo equivalente è SL/leva
+                sl_price_move = self.config.BASE_STOP_LOSS / 100.0 / max(leverage, 1)
+                if signal == 'BUY':
+                    stop_price = price * (1 - sl_price_move)
+                else:
+                    stop_price = price * (1 + sl_price_move)
+
+                result = self.kraken.place_order(
+                    pair=pair.kraken_pair,
+                    order_type=order_type,
+                    volume=volume,
+                    leverage=leverage,
+                    reduce_only=False,
+                    close_stop_price=stop_price
+                )
+                print(f"   ✓ Eseguita: {result}")
+                print(f"   🛡️ Stop-loss exchange @ {stop_price:.4f}")
+            else:
+                print(f"   🧪 [SIMULAZIONE] Trade registrato")
+
             trade_record = {
                 'symbol': pair.yf_symbol,
                 'entry_price': price,
@@ -1090,20 +1185,7 @@ class TradingBotV4:
                 'vol': volume
             }
             self.trades_history.append(trade_record)
-            self._save_trades_history()  # ✅ Salva su file
-
-            if not self.config.DRY_RUN:
-                order_type = 'buy' if signal == 'BUY' else 'sell'
-                result = self.kraken.place_order(
-                    pair=pair.kraken_pair,
-                    order_type=order_type,
-                    volume=volume,
-                    leverage=leverage,
-                    reduce_only=False
-                )
-                print(f"   ✓ Eseguita: {result}")
-            else:
-                print(f"   🧪 [SIMULAZIONE] Trade registrato")
+            self._save_trades_history()
 
             # Notifica V4
             self._send_v4_notification(
@@ -1351,7 +1433,23 @@ class TradingBotV4:
                                 }
             else:
                 positions = self.kraken.get_open_positions()
-            
+
+                # Kraken OpenPositions non include 'leverage': recuperalo dallo
+                # storico trades (o config) altrimenti la chiusura salta reduce_only
+                for pair_key, pos_data in positions.items():
+                    if 'leverage' not in pos_data:
+                        tp = next((p for p in self.config.TRADING_PAIRS if p.kraken_pair == pair_key), None)
+                        lev = None
+                        if tp:
+                            open_trade = next(
+                                (t for t in reversed(self.trades_history)
+                                 if t.get('symbol') == tp.yf_symbol and not t.get('closed', False)),
+                                None
+                            )
+                            if open_trade:
+                                lev = open_trade.get('leverage')
+                        pos_data['leverage'] = str(lev if lev else self.config.LEVERAGE)
+
             open_symbols = []
             total_margin_used = 0.0
             valid_position_count = len(positions)
