@@ -205,8 +205,20 @@ jobs:
             git add trades_v4_live.json
             if ! git diff --cached --quiet; then
               git commit -m "Auto-sync trades_v4_live.json [skip ci]"
-              git push
-              echo "✓ trades_v4_live.json aggiornato nel repo"
+              pushed=false
+              for attempt in 1 2 3; do
+                if git pull --rebase origin main && git push origin HEAD:main; then
+                  pushed=true
+                  echo "✓ trades_v4_live.json aggiornato nel repo"
+                  break
+                fi
+                echo "⚠️ Push attempt ${attempt}/3 failed, retrying..."
+                git rebase --abort || true
+              done
+
+              if [ "$pushed" = false ]; then
+                echo "⚠️ Impossibile fare push dopo 3 tentativi (non-fast-forward/conflitto). Skip sync senza fallire il job."
+              fi
             else
               echo "✓ Nessuna modifica ai trade — skip commit"
             fi
