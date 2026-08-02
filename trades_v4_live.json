@@ -104,5 +104,69 @@
     "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale BUY, conf 0.90)",
     "pnl_pct": 0.8855171284929969,
     "profit_amount": 0.47817924938621836
+  },
+  {
+    "symbol": "ETH-EUR",
+    "entry_price": 1610.3199462890625,
+    "volume": 0.038639664350933245,
+    "leverage": 1,
+    "capital": 62.22222222222223,
+    "signal": "BUY",
+    "confidence": 0.6389864424039041,
+    "timestamp": "2026-08-02T12:38:14.081662",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "BUY",
+        "confidence": 0.6389864424039041,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: BUY (0.90)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: BUY (0.33)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 62.22222222222223,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "long",
+    "vol": 0.038639664350933245
+  },
+  {
+    "symbol": "BTC-EUR",
+    "entry_price": 54737.8984375,
+    "volume": 0.001023057179733363,
+    "leverage": 1,
+    "capital": 56.0,
+    "signal": "BUY",
+    "confidence": 0.5371039496266621,
+    "timestamp": "2026-08-02T12:38:14.499479",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "BUY",
+        "confidence": 0.5371039496266621,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: BUY (0.65)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: BUY (0.40)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 56.0,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "long",
+    "vol": 0.001023057179733363
   }
 ]
