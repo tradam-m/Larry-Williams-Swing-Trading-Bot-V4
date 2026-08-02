@@ -1,1 +1,98 @@
-[]
+[
+  {
+    "symbol": "ADA-EUR",
+    "entry_price": 0.16189999878406525,
+    "volume": 411.77682005781605,
+    "leverage": 1,
+    "capital": 66.66666666666667,
+    "signal": "SELL",
+    "confidence": 0.6184058282209643,
+    "timestamp": "2026-08-02T09:26:02.729118",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.6184058282209643,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.90)",
+          "StrategyType.MOMENTUM": "momentum: SELL (0.44)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.46)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 66.66666666666667,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 411.77682005781605
+  },
+  {
+    "symbol": "BTC-EUR",
+    "entry_price": 54862.7890625,
+    "volume": 0.004374549746761701,
+    "leverage": 4,
+    "capital": 60.0,
+    "signal": "SELL",
+    "confidence": 0.4909090909090909,
+    "timestamp": "2026-08-02T09:26:03.174147",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.4909090909090909,
+        "consensus": 0.5,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.90)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: BUY (0.29)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 60.0,
+        "leverage": 4,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.004374549746761701
+  },
+  {
+    "symbol": "ETH-EUR",
+    "entry_price": 1622.780029296875,
+    "volume": 0.03327622907917923,
+    "leverage": 1,
+    "capital": 54.0,
+    "signal": "SELL",
+    "confidence": 0.4909090909090909,
+    "timestamp": "2026-08-02T09:26:03.564897",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.4909090909090909,
+        "consensus": 0.5,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.90)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: BUY (0.08)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 54.0,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 0.03327622907917923
+  }
+]
