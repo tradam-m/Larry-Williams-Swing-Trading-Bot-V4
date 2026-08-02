@@ -36,14 +36,14 @@ class DemoSafetyTests(unittest.TestCase):
         return bot
 
     @staticmethod
-    def make_params(capital=100.0, price=100.0):
+    def make_params(capital=100.0, price=100.0, signal='BUY', leverage=1):
         return {
             'capital': capital,
             'price': price,
-            'leverage': 1,
+            'leverage': leverage,
             'data': pd.DataFrame(),
             'analysis': {
-                'final_signal': 'BUY',
+                'final_signal': signal,
                 'confidence': 0.8,
                 'reasons': ['test'],
                 'v4_data': {},
@@ -156,6 +156,30 @@ class DemoSafetyTests(unittest.TestCase):
         self.assertEqual(bot.trades_history[0]['mode'], 'SIMULATION')
         bot.kraken.place_order.assert_not_called()
         bot._save_trades_history.assert_called_once_with()
+
+    def test_paper_allows_virtual_short_at_leverage_one(self):
+        bot = self.make_bot(dry_run=True)
+        pair = TradingPair('TEST-EUR', 'TESTEUR', 0.1, 0.10)
+
+        result = bot.open_position(
+            pair, self.make_params(signal='SELL', leverage=1)
+        )
+
+        self.assertEqual(result, 'opened')
+        self.assertEqual(bot.trades_history[0]['type'], 'short')
+        bot.kraken.place_order.assert_not_called()
+
+    def test_live_rejects_spot_short_at_leverage_one(self):
+        bot = self.make_bot(dry_run=False)
+        pair = TradingPair('TEST-EUR', 'TESTEUR', 0.1, 0.10)
+
+        result = bot.open_position(
+            pair, self.make_params(signal='SELL', leverage=1)
+        )
+
+        self.assertEqual(result, 'spot_sell')
+        self.assertEqual(bot.trades_history, [])
+        bot.kraken.place_order.assert_not_called()
 
     def test_successful_live_order_persists_after_confirmation(self):
         bot = self.make_bot(dry_run=False)

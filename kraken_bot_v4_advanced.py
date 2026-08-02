@@ -1179,7 +1179,8 @@ class TradingBotV4:
             return 'minimum_volume'
 
         # La leva finale (RL) può differire da config.LEVERAGE: short su spot impossibile
-        if signal == 'SELL' and (not leverage or leverage <= 1):
+        if (not self.config.DRY_RUN and signal == 'SELL' and
+            (not leverage or leverage <= 1)):
             print(f"   🚫 {pair.yf_symbol}: SELL con leva {leverage}x non eseguibile su spot, salto")
             return 'spot_sell'
 
@@ -1673,7 +1674,8 @@ class TradingBotV4:
                     continue
                 
                 # ── Filtro SELL su spot: con leva 1 non si può shortare ──
-                if signal == 'SELL' and self.config.LEVERAGE <= 1:
+                if (not self.config.DRY_RUN and signal == 'SELL' and
+                    self.config.LEVERAGE <= 1):
                     print(f"   🚫 {pair.yf_symbol}: SELL ignorato – leva {self.config.LEVERAGE}x (spot), short non disponibile")
                     self.funnel_stats['spot_sell'] += 1
                     continue
