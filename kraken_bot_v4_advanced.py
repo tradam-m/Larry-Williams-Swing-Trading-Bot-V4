@@ -99,6 +99,7 @@ class Config:
     MIN_ONCHAIN_STRENGTH = float(os.getenv('MIN_ONCHAIN_STRENGTH', '0.5'))
     
     USE_ENSEMBLE_SYSTEM = os.getenv('USE_ENSEMBLE_SYSTEM', 'false').lower() == 'true'
+    MIN_ENSEMBLE_SCORE = float(os.getenv('MIN_ENSEMBLE_SCORE', '0.30'))
     MIN_ENSEMBLE_CONSENSUS = float(os.getenv('MIN_ENSEMBLE_CONSENSUS', '0.6'))
     MIN_ENSEMBLE_CONFIDENCE = float(os.getenv('MIN_ENSEMBLE_CONFIDENCE', '0.6'))
     
@@ -148,12 +149,23 @@ class Config:
     CANDLE_INTERVAL = os.getenv('CANDLE_INTERVAL', '1h')
     USE_VOLUME_FILTER = os.getenv('USE_VOLUME_FILTER', 'true').lower() == 'true'
     REGIME_LOOKBACK = int(os.getenv('REGIME_LOOKBACK', '30'))
+    USE_VOLATILE_ENTRY_FILTER = os.getenv('USE_VOLATILE_ENTRY_FILTER', 'true').lower() == 'true'
+    USE_SMA200_FILTER = os.getenv('USE_SMA200_FILTER', 'true').lower() == 'true'
     
     USE_ML_VALIDATION = os.getenv('USE_ML_VALIDATION', 'true').lower() == 'true'
     ML_CONFIDENCE_THRESHOLD = float(os.getenv('ML_CONFIDENCE_THRESHOLD', '0.6'))
     
     # ══════════════════ Mode ══════════════════
     DRY_RUN = os.getenv('DRY_RUN', 'true').lower() == 'true'
+    SIMULATION_BALANCE = float(os.getenv('SIMULATION_BALANCE', '1000'))
+
+
+def has_required_kraken_credentials(config: Config) -> bool:
+    """Il paper trading non richiede credenziali private Kraken."""
+    return bool(
+        config.DRY_RUN or
+        (config.KRAKEN_API_KEY and config.KRAKEN_API_SECRET)
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -785,7 +797,10 @@ class TradingBotV4:
                 StrategyType.MEAN_REVERSION: config.WEIGHT_MEAN_REVERSION,
                 StrategyType.TREND_FOLLOWING: config.WEIGHT_TREND_FOLLOWING
             }
-            self.ensemble = EnsembleSystem(weights=weights)
+            self.ensemble = EnsembleSystem(
+                weights=weights,
+                min_score=config.MIN_ENSEMBLE_SCORE
+            )
             print("   ✓ Ensemble System attivato")
         else:
             self.ensemble = None
@@ -899,6 +914,30 @@ class TradingBotV4:
             raise Exception(f"No data for {symbol}")
         
         return data
+
+    def _get_account_funds(self) -> Tuple[float, float, str]:
+        """Restituisce saldo, margine e valuta senza API private in paper."""
+        if self.config.DRY_RUN:
+            return self.config.SIMULATION_BALANCE, self.config.SIMULATION_BALANCE, 'EUR'
+
+        balance, currency = self.kraken.get_balance()
+        return balance, self.kraken.get_available_margin(), currency
+
+    def _get_entry_filter_rejection(self, signal: str, data: pd.DataFrame,
+                                    current_price: float) -> Optional[str]:
+        """Restituisce il gate che rifiuta il segnale, oppure None."""
+        regime = RegimeDetector.detect(data, self.config.REGIME_LOOKBACK)
+        if self.config.USE_VOLATILE_ENTRY_FILTER and regime == 'VOLATILE':
+            return 'volatile'
+
+        if self.config.USE_SMA200_FILTER and len(data) >= 200:
+            sma_200 = float(data['Close'].rolling(200).mean().iloc[-1])
+            if signal == 'BUY' and current_price < sma_200:
+                return 'sma200'
+            if signal == 'SELL' and current_price > sma_200:
+                return 'sma200'
+
+        return None
     
     def analyze_trading_opportunity(self, 
                                 pair: TradingPair,
@@ -922,7 +961,8 @@ class TradingBotV4:
             'reasons': [],
             'capital': 0.0,
             'leverage': self.config.LEVERAGE,
-            'v4_data': {}
+            'v4_data': {},
+            'rejection_stage': None
         }
         
         # ═══════════════ LAYER 1: SENTIMENT ANALYSIS ═══════════════
@@ -947,6 +987,7 @@ class TradingBotV4:
                     )
                     
                     if not can_trade_sentiment:
+                        result['rejection_stage'] = 'sentiment'
                         result['reasons'].append(
                             f"❌ Sentiment conflictivo: {sentiment.overall_score:.2f}"
                         )
@@ -984,6 +1025,7 @@ class TradingBotV4:
                     )
                     
                     if not can_trade_onchain:
+                        result['rejection_stage'] = 'onchain'
                         result['reasons'].append(
                             f"❌ On-Chain conflittivo: {onchain.signal_type}"
                         )
@@ -1022,6 +1064,7 @@ class TradingBotV4:
                     ensemble_decision.consensus_level < self.config.MIN_ENSEMBLE_CONSENSUS or
                     ensemble_decision.confidence < self.config.MIN_ENSEMBLE_CONFIDENCE):
                     
+                    result['rejection_stage'] = 'ensemble'
                     result['reasons'].append(
                         f"❌ Ensemble: {ensemble_decision.final_signal} "
                         f"(consensus: {ensemble_decision.consensus_level:.2f}, "
@@ -1069,8 +1112,13 @@ class TradingBotV4:
             print(f"\n   🤖 Layer 4: RL Position Sizing")
             try:
                 # Obtener posiciones abiertas
-                positions = self.kraken.get_open_positions()
-                open_positions_count = len(positions)
+                if self.config.DRY_RUN:
+                    open_positions_count = sum(
+                        1 for trade in self.trades_history
+                        if not trade.get('closed', False)
+                    )
+                else:
+                    open_positions_count = len(self.kraken.get_open_positions())
                 
                 # Calcular tamaño óptimo con RL
                 capital, leverage = self.rl_calculator.get_optimal_size(
@@ -1111,7 +1159,7 @@ class TradingBotV4:
     
     def open_position(self, 
             pair: TradingPair,
-            params: dict):
+            params: dict) -> str:
         # Estraiamo i dati dal pacchetto 'params' 📦
         capital = params['capital']
         price = params['price']
@@ -1128,12 +1176,12 @@ class TradingBotV4:
         # Verifica volume minimo
         if volume < pair.min_volume:
             print(f"   ⚠️ Volume {volume:.8f} < minimo {pair.min_volume}")
-            return
+            return 'minimum_volume'
 
         # La leva finale (RL) può differire da config.LEVERAGE: short su spot impossibile
         if signal == 'SELL' and (not leverage or leverage <= 1):
             print(f"   🚫 {pair.yf_symbol}: SELL con leva {leverage}x non eseguibile su spot, salto")
-            return
+            return 'spot_sell'
 
         try:
             print(f"\n🟢 Apertura {signal} su {pair.yf_symbol}")
@@ -1164,6 +1212,8 @@ class TradingBotV4:
                     reduce_only=False,
                     close_stop_price=stop_price
                 )
+                if not result:
+                    raise RuntimeError("Kraken non ha confermato l'ordine")
                 print(f"   ✓ Eseguita: {result}")
                 print(f"   🛡️ Stop-loss exchange @ {stop_price:.4f}")
             else:
@@ -1184,6 +1234,8 @@ class TradingBotV4:
                 'type': 'long' if signal == 'BUY' else 'short',
                 'vol': volume
             }
+
+            # In live il record viene persistito solo dopo la conferma Kraken.
             self.trades_history.append(trade_record)
             self._save_trades_history()
 
@@ -1192,11 +1244,34 @@ class TradingBotV4:
                 pair, signal, price, volume, leverage, 
                 confidence, analysis['reasons'], analysis.get('v4_data', {})
             )
+            return 'opened'
         except Exception as e:
             error_msg = str(e)
             print(f"   ❌ Errore: {error_msg}")
             if "EOrder:Insufficient funds" not in error_msg:
                 self.telegram.send(f"❌ Errore in {pair.yf_symbol}: {error_msg}")
+            return 'api_error'
+
+    def _print_funnel_summary(self):
+        """Stampa il riepilogo dei gate di ingresso dell'ultimo ciclo."""
+        labels = (
+            ('no_swing', 'nessun swing'),
+            ('spot_sell', 'SELL spot'),
+            ('volatile', 'VOLATILE'),
+            ('sma200', 'SMA200'),
+            ('sentiment', 'sentiment'),
+            ('onchain', 'on-chain'),
+            ('ensemble', 'ensemble'),
+            ('correlation', 'correlazione'),
+            ('minimum_volume', 'volume minimo'),
+            ('api_error', 'errore API'),
+            ('opened', 'aperti')
+        )
+        print("\n📈 Riepilogo funnel ingressi:")
+        print("   " + " | ".join(
+            f"{label}: {self.funnel_stats.get(key, 0)}"
+            for key, label in labels
+        ))
     
     def _send_v4_notification(self, pair, signal, price, volume, 
                             leverage, confidence, reasons, v4_data):
@@ -1350,6 +1425,11 @@ class TradingBotV4:
         print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"Mode: {'🧪 SIMULAZIONE' if self.config.DRY_RUN else '💰 REAL'}")
         print(f"ML Validation: {'✅' if self.config.USE_ML_VALIDATION else '❌'}")
+        print(f"Filtri ingresso: VOLATILE={'ON' if self.config.USE_VOLATILE_ENTRY_FILTER else 'OFF'}, "
+              f"SMA200={'ON' if self.config.USE_SMA200_FILTER else 'OFF'}")
+        print(f"Soglie ensemble: score={self.config.MIN_ENSEMBLE_SCORE:.2f}, "
+              f"consensus={self.config.MIN_ENSEMBLE_CONSENSUS:.2f}, "
+              f"confidence={self.config.MIN_ENSEMBLE_CONFIDENCE:.2f}")
         
         # Mostrar features V4 activas
         print("\n🤖 AI Features V4:")
@@ -1359,12 +1439,21 @@ class TradingBotV4:
         print(f"   RL Position Sizing: {'✅' if self.rl_calculator else '❌'}")
         print("="*70)
         
+        self.funnel_stats = {
+            'no_swing': 0, 'spot_sell': 0, 'volatile': 0, 'sma200': 0,
+            'sentiment': 0, 'onchain': 0, 'ensemble': 0,
+            'correlation': 0, 'minimum_volume': 0, 'api_error': 0,
+            'opened': 0
+        }
+
         try:
             # Obtener balance y margen
-            balance, currency = self.kraken.get_balance()
-            available_margin = self.kraken.get_available_margin()
+            balance, available_margin, currency = self._get_account_funds()
+            if self.config.DRY_RUN:
+                print(f"\n💰 Capitale virtuale: {balance:.2f} {currency}")
+            else:
+                print(f"\n💰 Capitale reale Kraken: {balance:.2f} {currency}")
             
-            print(f"\n💰 Saldo: {balance:.2f} {currency}")
             print(f"   Margine disponibile: {available_margin:.2f} {currency}")
             
             if balance < self.config.MIN_BALANCE:
@@ -1580,30 +1669,32 @@ class TradingBotV4:
                 
                 if not signal:
                     print(f"   - {pair.yf_symbol}: nessun segnale swing")
+                    self.funnel_stats['no_swing'] += 1
                     continue
                 
                 # ── Filtro SELL su spot: con leva 1 non si può shortare ──
                 if signal == 'SELL' and self.config.LEVERAGE <= 1:
                     print(f"   🚫 {pair.yf_symbol}: SELL ignorato – leva {self.config.LEVERAGE}x (spot), short non disponibile")
+                    self.funnel_stats['spot_sell'] += 1
                     continue
                 
                 print(f"\n   🎯 {pair.yf_symbol}: Segnale {signal} rilevato")
 
                 # ── Filtro Regime: nessuna nuova posizione in mercato VOLATILE ──
-                regime_entry = RegimeDetector.detect(data, self.config.REGIME_LOOKBACK)
-                if regime_entry == 'VOLATILE':
+                entry_rejection = self._get_entry_filter_rejection(
+                    signal, data, current_price
+                )
+                if entry_rejection == 'volatile':
                     print(f"   🚫 {pair.yf_symbol}: saltato – mercato VOLATILE (rischio eccessivo)")
+                    self.funnel_stats['volatile'] += 1
                     continue
-
-                # ── Filtro Trend SMA200: opera solo nella direzione del trend principale ──
-                if len(data) >= 200:
-                    sma_200 = data['Close'].rolling(200).mean().iloc[-1]
-                    if signal == 'BUY' and current_price < sma_200:
-                        print(f"   🚫 {pair.yf_symbol}: BUY rifiutato – prezzo ({current_price:.4f}) sotto SMA200 ({sma_200:.4f})")
-                        continue
-                    elif signal == 'SELL' and current_price > sma_200:
-                        print(f"   🚫 {pair.yf_symbol}: SELL rifiutato – prezzo ({current_price:.4f}) sopra SMA200 ({sma_200:.4f})")
-                        continue
+                if entry_rejection == 'sma200':
+                    sma_200 = float(data['Close'].rolling(200).mean().iloc[-1])
+                    direction = 'sotto' if signal == 'BUY' else 'sopra'
+                    print(f"   🚫 {pair.yf_symbol}: {signal} rifiutato – prezzo "
+                          f"({current_price:.4f}) {direction} SMA200 ({sma_200:.4f})")
+                    self.funnel_stats['sma200'] += 1
+                    continue
 
                 # ═══════════════════════════════════════════════════
                 #       ANÁLISIS COMPLETO V4
@@ -1615,6 +1706,9 @@ class TradingBotV4:
                 
                 if not analysis['can_trade']:
                     print(f"   ❌ Rifiutato da analisi V4")
+                    stage = analysis.get('rejection_stage')
+                    if stage in self.funnel_stats:
+                        self.funnel_stats[stage] += 1
                     continue
                 
                 # Verificar correlación
@@ -1624,6 +1718,7 @@ class TradingBotV4:
                 
                 if not can_open:
                     print(f"   ⚠️ Rifiutato per correlazione ({max_corr:.2f})")
+                    self.funnel_stats['correlation'] += 1
                     continue
                 
                 # Señal validada
@@ -1673,10 +1768,12 @@ class TradingBotV4:
                 }
 
                 # Chiamiamo la funzione passando solo il pair e il dizionario params
-                self.open_position(sig['pair'], params)
+                open_result = self.open_position(sig['pair'], params)
+                if open_result in self.funnel_stats:
+                    self.funnel_stats[open_result] += 1
                 
                 # Restar margen usado para siguiente posición
-                margin_used = capital
+                margin_used = capital if open_result == 'opened' else 0.0
                 remaining_margin = max(0, remaining_margin - margin_used)
                 
                 if remaining_margin < self.config.MIN_BALANCE * 0.5:
@@ -1696,6 +1793,8 @@ class TradingBotV4:
             traceback.print_exc()
             self.telegram.send(f"❌ Bot V4 Error: {msg}")
             raise
+        finally:
+            self._print_funnel_summary()
     
     def _update_rl_on_close(self, symbol: str, pos_data: dict, 
                         exit_price: float, reason: str):
@@ -1763,7 +1862,7 @@ def main():
     config = Config()
     
     # Verificar credenciales básicas
-    if not config.KRAKEN_API_KEY or not config.KRAKEN_API_SECRET:
+    if not has_required_kraken_credentials(config):
         print("❌ Mancano credenziali Kraken")
         return
     

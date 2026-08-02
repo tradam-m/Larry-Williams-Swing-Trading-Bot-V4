@@ -263,10 +263,12 @@ class EnsembleSystem:
     Sistema ensemble que combina múltiples estrategias.
     """
     
-    def __init__(self, weights: Optional[Dict[StrategyType, float]] = None):
+    def __init__(self, weights: Optional[Dict[StrategyType, float]] = None,
+                 min_score: float = 0.30):
         """
         Args:
             weights: Pesos para cada estrategia. Si None, usa pesos iguales.
+            min_score: Puntuación ponderada mínima para emitir una señal.
         """
         self.weights = weights or {
             StrategyType.SWING: 0.30,
@@ -278,6 +280,7 @@ class EnsembleSystem:
         # Normalizar pesos
         total = sum(self.weights.values())
         self.weights = {k: v/total for k, v in self.weights.items()}
+        self.min_score = min_score
     
     def get_ensemble_decision(self, data: pd.DataFrame, 
                             swing_signal: Optional[Tuple] = None) -> EnsembleDecision:
@@ -363,10 +366,10 @@ class EnsembleSystem:
         consensus_level = max_votes / total_count if total_count > 0 else 0.0
         
         # Decisión final basada en scores ponderados
-        if buy_score > sell_score and buy_score > 0.3:  # Threshold mínimo
+        if buy_score > sell_score and buy_score >= self.min_score:
             final_signal = 'BUY'
             confidence = min(1.0, buy_score / total_weight) if total_weight > 0 else 0.0
-        elif sell_score > buy_score and sell_score > 0.3:
+        elif sell_score > buy_score and sell_score >= self.min_score:
             final_signal = 'SELL'
             confidence = min(1.0, sell_score / total_weight) if total_weight > 0 else 0.0
         else:

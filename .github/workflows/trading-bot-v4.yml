@@ -27,6 +27,10 @@ on:
         required: false
         default: "true"
 
+concurrency:
+  group: trading-bot-v4-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   trade:
     runs-on: ubuntu-latest
@@ -87,30 +91,32 @@ jobs:
           # ═══════════════════════════════════════════════════════════
           #                    APIS
           # ═══════════════════════════════════════════════════════════
-          KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
-          KRAKEN_API_SECRET: ${{ secrets.KRAKEN_API_SECRET }}
-          CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
+          # Gli schedule paper non ricevono credenziali private Kraken.
+          KRAKEN_API_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.KRAKEN_API_KEY || '' }}
+          KRAKEN_API_SECRET: ${{ github.event_name == 'workflow_dispatch' && secrets.KRAKEN_API_SECRET || '' }}
+          CRYPTOCOMPARE_API_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.CRYPTOCOMPARE_API_KEY || '' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
           # ═══════════════════════════════════════════════════════════
           #            SENTIMENT ANALYSIS (V4)
           # ═══════════════════════════════════════════════════════════
-          USE_SENTIMENT_ANALYSIS: ${{ github.event.inputs.use_sentiment || 'true' }}
+          USE_SENTIMENT_ANALYSIS: ${{ github.event_name == 'schedule' && 'false' || inputs.use_sentiment }}
           MIN_SENTIMENT_CONFIDENCE: "0.5"
 
           # ═══════════════════════════════════════════════════════════
           #            ON-CHAIN ANALYSIS (V4)
           # ═══════════════════════════════════════════════════════════
-          USE_ONCHAIN_ANALYSIS: ${{ github.event.inputs.use_onchain || 'true' }}
+          USE_ONCHAIN_ANALYSIS: ${{ github.event_name == 'schedule' && 'false' || inputs.use_onchain }}
           MIN_ONCHAIN_STRENGTH: "0.5"
 
           # ═══════════════════════════════════════════════════════════
           #         MULTI-STRATEGY ENSEMBLE (V4)
           # ═══════════════════════════════════════════════════════════
-          USE_ENSEMBLE_SYSTEM: ${{ github.event.inputs.use_ensemble || 'true' }}
-          MIN_ENSEMBLE_CONSENSUS: "0.6" # 60% estrategias deben coincidir
-          MIN_ENSEMBLE_CONFIDENCE: "0.6" # Confianza mínima del ensemble
+          USE_ENSEMBLE_SYSTEM: ${{ github.event_name == 'schedule' && 'true' || inputs.use_ensemble }}
+          MIN_ENSEMBLE_SCORE: "0.25"
+          MIN_ENSEMBLE_CONSENSUS: "0.50"
+          MIN_ENSEMBLE_CONFIDENCE: "0.45"
 
           # Pesos de estrategias (deben sumar ~1.0)
           WEIGHT_SWING: "0.30"
@@ -121,7 +127,7 @@ jobs:
           # ═══════════════════════════════════════════════════════════
           #       REINFORCEMENT LEARNING (V4)
           # ═══════════════════════════════════════════════════════════
-          USE_RL_POSITION_SIZING: ${{ github.event.inputs.use_rl || 'true' }}
+          USE_RL_POSITION_SIZING: ${{ github.event_name == 'schedule' && 'true' || inputs.use_rl }}
           RL_LEARNING_RATE: "0.1" # Alpha
           RL_DISCOUNT_FACTOR: "0.95" # Gamma
           RL_EPSILON: "0.1" # Exploración (10%)
@@ -131,13 +137,14 @@ jobs:
           #            MULTI-ASSET TRADING (v4)
           # ═══════════════════════════════════════════════════════════
           MAX_CORRELATION: "0.7"
-          MAX_POSITIONS: "5"
+          MAX_POSITIONS: "3"
 
           # ═══════════════════════════════════════════════════════════
           #            RISK MANAGEMENT
           # ═══════════════════════════════════════════════════════════
           LEVERAGE: "3" # Base leverage (RL puede ajustar)
           MIN_BALANCE: "1.0"
+          CAPITAL_PER_TRADE: "0.10"
 
           STOP_LOSS_PCT: "4.0" # Base (regime puede ajustar)
           TAKE_PROFIT_PCT: "8.0"
@@ -151,6 +158,8 @@ jobs:
           CANDLE_INTERVAL: "4h"
           USE_VOLUME_FILTER: "true"
           REGIME_LOOKBACK: "30"
+          USE_VOLATILE_ENTRY_FILTER: "true"
+          USE_SMA200_FILTER: "false"
 
           # ML Validation (v4)
           USE_ML_VALIDATION: "true"
@@ -168,7 +177,9 @@ jobs:
           # ═══════════════════════════════════════════════════════════
           #            MODE
           # ═══════════════════════════════════════════════════════════
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+          # Uno schedule non può mai inviare ordini reali.
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'true' || inputs.dry_run }}
+          SIMULATION_BALANCE: "1000"
 
         run: |
           echo "═══════════════════════════════════════════════════════════════════"

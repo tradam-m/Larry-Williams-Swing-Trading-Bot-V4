@@ -2,7 +2,7 @@ import time
 import sys
 import traceback
 from datetime import datetime
-from kraken_bot_v4_advanced import TradingBotV4, Config, SENTIMENT_AVAILABLE, ONCHAIN_AVAILABLE, ENSEMBLE_AVAILABLE, RL_AVAILABLE
+from kraken_bot_v4_advanced import TradingBotV4, Config, has_required_kraken_credentials
 
 def log_to_file(message):
     try:
@@ -21,7 +21,7 @@ def run_bot_cycle():
         config = Config()
         
         # Verificar credenciales básicas
-        if not config.KRAKEN_API_KEY or not config.KRAKEN_API_SECRET:
+        if not has_required_kraken_credentials(config):
             print("❌ Mancano credenziali Kraken")
             log_to_file("❌ Errore: Mancano credenziali Kraken")
             return
@@ -37,8 +37,9 @@ def run_bot_cycle():
         traceback.print_exc()
 
 def main():
+    mode = "PAPER TRADING" if Config.DRY_RUN else "TRADING REALE"
     print("\n" + "═"*70)
-    print("🚀 AVVIO SIMULAZIONE LIVE (PAPER TRADING) - 24 ORE")
+    print(f"🚀 AVVIO BOT - {mode} - 24 ORE")
     print(f"   Intervallo: {Config.CANDLE_INTERVAL}")
     print("   Premi Ctrl+C per fermare")
     print("═"*70)
