@@ -215,6 +215,7 @@ class DemoSafetyTests(unittest.TestCase):
         self.assertIn("USE_ONCHAIN_ANALYSIS: ${{ github.event_name == 'schedule' && 'false'", workflow)
         self.assertIn('group: trading-bot-v4-${{ github.ref }}', workflow)
         self.assertIn('cancel-in-progress: false', workflow)
+        self.assertIn('git pull --rebase --autostash origin main', workflow)
 
 
 if __name__ == '__main__':
