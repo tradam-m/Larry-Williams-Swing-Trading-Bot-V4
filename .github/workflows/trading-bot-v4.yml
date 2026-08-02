@@ -92,8 +92,8 @@ jobs:
           #                    APIS
           # ═══════════════════════════════════════════════════════════
           # Gli schedule paper non ricevono credenziali private Kraken.
-          KRAKEN_API_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.KRAKEN_API_KEY || '' }}
-          KRAKEN_API_SECRET: ${{ github.event_name == 'workflow_dispatch' && secrets.KRAKEN_API_SECRET || '' }}
+          KRAKEN_API_KEY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'false' && secrets.KRAKEN_API_KEY || '' }}
+          KRAKEN_API_SECRET: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'false' && secrets.KRAKEN_API_SECRET || '' }}
           CRYPTOCOMPARE_API_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.CRYPTOCOMPARE_API_KEY || '' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

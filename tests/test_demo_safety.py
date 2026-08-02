@@ -182,7 +182,11 @@ class DemoSafetyTests(unittest.TestCase):
 
         self.assertIn("DRY_RUN: ${{ github.event_name == 'schedule' && 'true' || inputs.dry_run }}", workflow)
         self.assertIn('SIMULATION_BALANCE: "1000"', workflow)
-        self.assertIn("KRAKEN_API_KEY: ${{ github.event_name == 'workflow_dispatch'", workflow)
+        live_secret_guard = (
+            "github.event_name == 'workflow_dispatch' && "
+            "inputs.dry_run == 'false' && secrets.KRAKEN_API_KEY"
+        )
+        self.assertIn(live_secret_guard, workflow)
         self.assertIn("USE_SENTIMENT_ANALYSIS: ${{ github.event_name == 'schedule' && 'false'", workflow)
         self.assertIn("USE_ONCHAIN_ANALYSIS: ${{ github.event_name == 'schedule' && 'false'", workflow)
         self.assertIn('group: trading-bot-v4-${{ github.ref }}', workflow)
