@@ -210,5 +210,37 @@
     "exit_reason": "\ud83d\uded1 Stop Loss: -3.58%",
     "pnl_pct": -3.577824938627117,
     "profit_amount": -2.103231015773689
+  },
+  {
+    "symbol": "ADA-EUR",
+    "entry_price": 0.16820000112056732,
+    "volume": 349.4957478808066,
+    "leverage": 1,
+    "capital": 58.785185185185185,
+    "signal": "SELL",
+    "confidence": 0.54,
+    "timestamp": "2026-08-03T23:55:06.228765",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.54,
+        "consensus": 0.5,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.90)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: None (0.00)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: BUY (0.69)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 58.785185185185185,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 349.4957478808066
   }
 ]
