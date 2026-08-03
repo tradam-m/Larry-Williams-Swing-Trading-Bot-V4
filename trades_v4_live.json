@@ -26,10 +26,15 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "short",
-    "vol": 411.77682005781605
+    "vol": 411.77682005781605,
+    "exit_price": 0.16859999299049377,
+    "exit_time": "2026-08-03T15:44:32.041961",
+    "exit_reason": "\ud83d\uded1 Stop Loss: -4.14%",
+    "pnl_pct": -4.138353463093394,
+    "profit_amount": -2.7589023087289295
   },
   {
     "symbol": "BTC-EUR",
