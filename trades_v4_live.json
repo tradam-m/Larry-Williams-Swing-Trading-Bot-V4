@@ -173,5 +173,37 @@
     "mode": "SIMULATION",
     "type": "long",
     "vol": 0.001023057179733363
+  },
+  {
+    "symbol": "ADA-EUR",
+    "entry_price": 0.16769999265670776,
+    "volume": 1051.6133767314245,
+    "leverage": 3,
+    "capital": 58.785185185185185,
+    "signal": "SELL",
+    "confidence": 0.54,
+    "timestamp": "2026-08-03T21:57:00.084819",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.54,
+        "consensus": 0.5,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.90)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: None (0.00)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: BUY (0.68)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 58.785185185185185,
+        "leverage": 3,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 1051.6133767314245
   }
 ]
