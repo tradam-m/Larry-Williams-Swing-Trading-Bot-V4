@@ -275,9 +275,14 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "long",
-    "vol": 344.17555642553316
+    "vol": 344.17555642553316,
+    "exit_price": 0.1647000014781952,
+    "exit_time": "2026-08-05T03:49:36.838969",
+    "exit_reason": "\ud83d\uded1 Stop Loss: -3.57%",
+    "pnl_pct": -3.571427948261912,
+    "profit_amount": -2.0994705331412247
   }
 ]
