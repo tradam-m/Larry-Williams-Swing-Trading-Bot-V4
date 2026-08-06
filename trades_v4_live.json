@@ -391,9 +391,14 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "long",
-    "vol": 355.19749331022564
+    "vol": 355.19749331022564,
+    "exit_price": 0.17900000512599945,
+    "exit_time": "2026-08-06T15:31:53.121855",
+    "exit_reason": "\ud83c\udfaf Take Profit: 8.16%",
+    "pnl_pct": 8.157102717260505,
+    "profit_amount": 4.795167938087361
   }
 ]
