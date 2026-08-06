@@ -137,10 +137,15 @@
         "base_leverage": 3
       }
     },
-    "closed": false,
+    "closed": true,
     "mode": "SIMULATION",
     "type": "long",
-    "vol": 0.038639664350933245
+    "vol": 0.038639664350933245,
+    "exit_price": 1647.260009765625,
+    "exit_time": "2026-08-06T13:37:14.962314",
+    "exit_reason": "\ud83d\udd04 Inversione Trend (Segnale SELL, conf 0.90)",
+    "pnl_pct": 2.2939580150944443,
+    "profit_amount": 1.4273516538365434
   },
   {
     "symbol": "BTC-EUR",
