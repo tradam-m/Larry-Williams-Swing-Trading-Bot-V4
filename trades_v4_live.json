@@ -400,5 +400,37 @@
     "exit_reason": "\ud83c\udfaf Take Profit: 8.16%",
     "pnl_pct": 8.157102717260505,
     "profit_amount": 4.795167938087361
+  },
+  {
+    "symbol": "XRP-EUR",
+    "entry_price": 0.8981999754905701,
+    "volume": 70.06605995392177,
+    "leverage": 1,
+    "capital": 62.93333333333334,
+    "signal": "SELL",
+    "confidence": 0.4743475654658087,
+    "timestamp": "2026-08-08T03:57:19.431327",
+    "v4_data": {
+      "ensemble": {
+        "final_signal": "SELL",
+        "confidence": 0.4743475654658087,
+        "consensus": 1.0,
+        "votes": {
+          "StrategyType.SWING": "swing: SELL (0.62)",
+          "StrategyType.MOMENTUM": "momentum: None (0.00)",
+          "StrategyType.MEAN_REVERSION": "mean_reversion: SELL (0.29)",
+          "StrategyType.TREND_FOLLOWING": "trend_following: None (0.00)"
+        }
+      },
+      "rl_sizing": {
+        "capital": 62.93333333333334,
+        "leverage": 1,
+        "base_leverage": 3
+      }
+    },
+    "closed": false,
+    "mode": "SIMULATION",
+    "type": "short",
+    "vol": 70.06605995392177
   }
 ]
